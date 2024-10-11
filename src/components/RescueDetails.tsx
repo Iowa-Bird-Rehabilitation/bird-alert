@@ -6,6 +6,7 @@ import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
 import Airtable from 'airtable'
 import Link from "next/link";
+import { useRouter } from 'next/navigation'
 
 export default function RescueDetails({id}: { id: string }) {
     //state variables
@@ -21,6 +22,7 @@ export default function RescueDetails({id}: { id: string }) {
     //connecting to airtable
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
     const base = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
+    const router = useRouter()
 
     const fetchBirdRescues = async () => {
         setError(null)
@@ -34,6 +36,7 @@ export default function RescueDetails({id}: { id: string }) {
             location: record.get('Full Pick Up Address') as string,
             destination: record.get('Drop Off Address') as string,
             status: record.get('VolunteerStatus') as RescueStatus,
+            birdStatus: record.get('BirdStatus') as BirdStatus,
             rtLevel: record.get('R&T Level') as RTLevel,
             skills: record.get('Technical Skills') as Skills[],
             possibleVolunteers: record.get("Possible Volunteers") as string[] ?? [],
@@ -52,7 +55,7 @@ export default function RescueDetails({id}: { id: string }) {
         });
     }, []);
 
-    // colors for the statuses that correpond to the airtable colors in the 'VolunteerStatus' column
+    // colors for the statuses that correspond to the airtable colors in the 'VolunteerStatus' column
     const getStatusColor = (status: RescueStatus) => {
         switch (status) {
             case 'Pending':
@@ -80,7 +83,7 @@ export default function RescueDetails({id}: { id: string }) {
     }
 
     //Change status of VolunteerStatus
-    const handleStatusChange = async (newStatus: RescueStatus) => {
+    const handleVolunteerStatusChange = async (newStatus: RescueStatus) => {
 
         if (birdRescue) {
             setIsLoading(true)
@@ -111,16 +114,49 @@ export default function RescueDetails({id}: { id: string }) {
                 setError('Failed to update rescue status. Please try again.')
             }
             setIsLoading(false)
-            if (newStatus !== "In Route") {
-                //setSelectedRescue(null)
-            }
         }
 
     }
 
+    ///// handle the change of the bird status
+    const handleBirdStatusChange = async (newBirdStatus : BirdStatus) => {
+
+        if (birdRescue) {
+            try {
+
+                let updatedFields
+                if (newBirdStatus === "Assessed" || newBirdStatus === "Died" || newBirdStatus === "No Show") {
+                    let newVolunteerStatus = "Incomplete"
+                    updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
+                }else if (newBirdStatus === "Rescued - Released") {
+                    let newVolunteerStatus = "Released On Site"
+                    updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
+                }
+
+                // update airtable column
+                if (birdRescue.currentVolunteer) {
+                    await updateRescueInAirtable(birdRescue.id, updatedFields)
+                }
+                
+                // update the bird in BirdAlertList so that it has the new status
+                const updatedBird = {
+                    ...birdRescue
+                }
+
+                updatedBird.birdStatus = newBirdStatus
+                setBirdRescue(updatedBird)
+
+            }catch (error) {
+                console.error('Error updating bird status:', error)
+                setError('Failed to update bird status. Please try again.')
+            }
+
+            router.push("/")
+        }
+    }
+
     function handleAcceptClick() {
         setShowAcceptForm(true)
-        handleStatusChange('In Route');
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -307,9 +343,27 @@ export default function RescueDetails({id}: { id: string }) {
                             <div className="flex items-center bg-stone-50 p-3 rounded-md">
                                 <CircleUser className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
                                 <span>Current Volunteer: <span
-                                    className='bold-text'>{birdRescue.currentVolunteer ? birdRescue.currentVolunteer : "AVAILABLE"}</span> </span>
-
+                                    className='bold-text'>{birdRescue.currentVolunteer ? birdRescue.currentVolunteer : "AVAILABLE"}</span> 
+                                </span>
                             </div>
+
+                            
+                            {
+                                birdRescue.status === "Pending" ?
+                                    <></>
+                                :
+                                    <div className="flex items-center bg-stone-50 p-3 rounded-md">
+                                        <select onChange={(e) => handleBirdStatusChange(e.target.value as BirdStatus)} name='bird-status'
+                                            className=" w-4/12 cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                                            <option value={""}>-- Additional Bird Statuses</option>
+                                            <option value={"Rescued - Released"}> Rescued - Released </option>
+                                            <option value={"No Show"}> No Show </option>
+                                            <option value={"Died"}> Died </option>
+                                            <option value={"Assessed"}> Assessed </option>
+                                        </select>
+                                    </div>
+                            }
+                                
                         </div>
                         <div className="space-y-4">
                             {
@@ -326,14 +380,14 @@ export default function RescueDetails({id}: { id: string }) {
                             {birdRescue.status === 'In Route' && (
                                 <Button
                                     className="w-full bg-red-700 hover:bg-red-800 text-white transition-colors duration-200"
-                                    onClick={() => handleStatusChange('Rescued')}>
+                                    onClick={() => handleVolunteerStatusChange('Rescued')}>
                                     Mark as rescued
                                 </Button>
                             )}
                             {birdRescue.status === 'Rescued' && (
                                 <Button
                                     className="w-full bg-emerald-700 hover:bg-emerald-800 text-white transition-colors duration-200"
-                                    onClick={() => handleStatusChange('Delivered')}>
+                                    onClick={() => handleVolunteerStatusChange('Delivered')}>
                                     Mark as Delivered
                                 </Button>
                             )}
