@@ -1,4 +1,4 @@
-import {ArrowLeftIcon, CircleUser, HomeIcon, MapPinIcon, XIcon} from 'lucide-react'
+import {ArrowLeftIcon, CircleUser, HomeIcon, MapPinIcon, Notebook, XIcon} from 'lucide-react'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Label} from '@/components/ui/label'
@@ -37,6 +37,7 @@ export default function RescueDetails({id}: { id: string }) {
             destination: record.get('Drop Off Address') as string,
             status: record.get('VolunteerStatus') as RescueStatus,
             birdStatus: record.get('BirdStatus') as BirdStatus,
+            notes: record.get("Notes") as String,
             rtLevel: record.get('R&T Level') as RTLevel,
             skills: record.get('Technical Skills') as Skills[],
             possibleVolunteers: record.get("Possible Volunteers") as string[] ?? [],
@@ -363,6 +364,12 @@ export default function RescueDetails({id}: { id: string }) {
                                         </select>
                                     </div>
                             }
+
+                            <div className="flex items-center bg-stone-50 p-3 rounded-md">
+                                <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
+                                <h2 className='mr-1'>Bird-Alert Notes:</h2>
+                                <p>{birdRescue.notes}</p>
+                            </div>
                                 
                         </div>
                         <div className="space-y-4">

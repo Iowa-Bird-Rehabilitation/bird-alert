@@ -56,6 +56,7 @@ export default function BirdAlertList() {
                 destination: record.get('Drop Off Address') as string,
                 status: record.get('VolunteerStatus') as RescueStatus,
                 birdStatus: record.get('BirdStatus') as BirdStatus,
+                notes: record.get('Notes') as String,
                 rtLevel: record.get('R&T Level') as RTLevel,
                 skills: record.get('Technical Skills') as Skills[],
                 possibleVolunteers: record.get("Possible Volunteers") as string[] ?? [],
