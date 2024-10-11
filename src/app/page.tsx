@@ -1,6 +1,6 @@
 'use client'
 
-import BirdAlertList from './BirdAlertList/BirdAlertList'
+import BirdAlertList from '../components/BirdAlertList'
 
 export default function BirdRescueApp() {
   return (
