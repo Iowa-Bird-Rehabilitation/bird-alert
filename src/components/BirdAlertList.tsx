@@ -15,7 +15,7 @@ import Link from "next/link";
 export default function BirdAlertList() {
     // creates the variables needed to set up the bird alert list
     const [birdRescues, setBirdRescues] = useState<BirdAlert[]>([])
-    const allStatuses = ['Pending', 'In Route', 'Rescued', 'Delivered'] as RescueStatus[];
+    const allStatuses = ['Pending', 'In Route', 'Rescued', 'Delivered', 'Incomplete', 'Released On Site'] as RescueStatus[];
     const [value, setValue] = useState(new Set<RescueStatus>(['Pending', 'In Route', 'Rescued']))
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -108,8 +108,12 @@ export default function BirdAlertList() {
                                     <CommandList>
                                         <CommandEmpty>No statuses found.</CommandEmpty>
                                         <CommandGroup>
-                                            {allStatuses.map((framework) => (
-                                                <CommandItem
+                                            {allStatuses.map((framework) => {
+                                                if (framework === "Delivered") {
+                                                    return
+                                                }
+                                                return (
+                                                    <CommandItem
                                                     key={framework}
                                                     onSelect={(currentValue: any) => {
                                                         const newValue = new Set(value)
@@ -119,16 +123,17 @@ export default function BirdAlertList() {
                                                             newValue.add(framework)
                                                         }
                                                         setValue(newValue)
-                                                    }}
-                                                >
-                                                    <Checkbox
-                                                        checked={value.has(framework)}
-                                                        className={cn(
-                                                            "mr-2 h-4 w-4"
-                                                        )}/>
-                                                    {framework}
-                                                </CommandItem>
-                                            ))}
+                                                        }}
+                                                    >
+                                                        <Checkbox
+                                                            checked={value.has(framework)}
+                                                            className={cn(
+                                                                "mr-2 h-4 w-4"
+                                                            )}/>
+                                                        {framework}
+                                                    </CommandItem>
+                                                )
+                                            })}
                                         </CommandGroup>
                                         <CommandItem>
                                             <Button onClick={() => setIsFilterIsFilterOpen(false)}>Done</Button>
@@ -154,46 +159,50 @@ export default function BirdAlertList() {
                             ).sort((a, b) => {
                                 // Show pending rescues first
                                 return allStatuses.indexOf(a.status) < allStatuses.indexOf(b.status) ? -1 : 1
-                            }).map(rescue => (
-                                <Card key={rescue.id} className="overflow-hidden">
-                                    <CardHeader className="p-4">
-                                        <div className="flex justify-between items-center">
-                                            <div className="flex items-center space-x-2">
-                                                <CardTitle
-                                                    className="text-lg font-semibold">{rescue.species}</CardTitle>
+                            }).map(rescue => {
+                                if (rescue.status === "Delivered" || rescue.status === "Incomplete") {return}
+                                return (
+                                    <Card key={rescue.id} className="overflow-hidden">
+                                        <CardHeader className="p-4">
+                                            <div className="flex justify-between items-center">
+                                                <div className="flex items-center space-x-2">
+                                                    <CardTitle
+                                                        className="text-lg font-semibold">{rescue.species}</CardTitle>
+                                                </div>
+                                                <Badge variant="secondary"
+                                                    className={`${getStatusColor(rescue.status)} text-white h-10`}>
+                                                    {rescue.status}
+                                                </Badge>
                                             </div>
-                                            <Badge variant="secondary"
-                                                   className={`${getStatusColor(rescue.status)} text-white h-10`}>
-                                                {rescue.status}
-                                            </Badge>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="p-4">
-                                        <div className="space-y-2">
-                                            <div className="flex items-center text-sm text-stone-600">
-                                                <MapPinIcon className="mr-2 h-4 w-4 flex-shrink-0"/>
-                                                <span className="truncate">{rescue.location}</span>
+                                        </CardHeader>
+                                        <CardContent className="p-4">
+                                            <div className="space-y-2">
+                                                <div className="flex items-center text-sm text-stone-600">
+                                                    <MapPinIcon className="mr-2 h-4 w-4 flex-shrink-0"/>
+                                                    <span className="truncate">{rescue.location}</span>
+                                                </div>
+                                                <div className="flex items-center text-sm text-stone-600">
+                                                    <HomeIcon className="mr-2 h-4 w-4 flex-shrink-0"/>
+                                                    <span className="truncate">{rescue.destination}</span>
+                                                </div>
+                                                <div className="flex items-center text-sm text-stone-600">
+                                                    <UserCircle className="mr-2 h-4 w-4 flex-shrink-0"/>
+                                                    <span>Current Volunteer: <span
+                                                        className='bold-text'>{rescue.currentVolunteer ? rescue.currentVolunteer : "AVAILABLE"}</span> </span>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center text-sm text-stone-600">
-                                                <HomeIcon className="mr-2 h-4 w-4 flex-shrink-0"/>
-                                                <span className="truncate">{rescue.destination}</span>
-                                            </div>
-                                            <div className="flex items-center text-sm text-stone-600">
-                                                <UserCircle className="mr-2 h-4 w-4 flex-shrink-0"/>
-                                                <span>Current Volunteer: <span
-                                                    className='bold-text'>{rescue.currentVolunteer ? rescue.currentVolunteer : "AVAILABLE"}</span> </span>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                    <CardFooter className="bg-stone-50 p-4">
-                                        <Link href={`/bird-alert/${rescue.id}`}
-                                              className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-9 px-4 py-2 w-full bg-white hover:bg-stone-50 transition-colors duration-200 ease-in-out text-black"
-                                        >
-                                            View Details
-                                        </Link>
-                                    </CardFooter>
-                                </Card>
-                            ))}
+                                        </CardContent>
+                                        <CardFooter className="bg-stone-50 p-4">
+                                            <Link href={`/bird-alert/${rescue.id}`}
+                                                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-9 px-4 py-2 w-full bg-white hover:bg-stone-50 transition-colors duration-200 ease-in-out text-black"
+                                            >
+                                                View Details
+                                            </Link>
+                                        </CardFooter>
+                                    </Card>
+                                )
+                                
+                            })}
                         </div>
                     )}
                 </CardContent>
