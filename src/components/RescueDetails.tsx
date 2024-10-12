@@ -71,15 +71,16 @@ export default function RescueDetails({id}: { id: string }) {
     }
 
     const getRTLevelColor = (level: RTLevel) => {
-        switch (level) {
-            case 'Green: songbirds & babies':
-                return 'bg-green-600 hover:bg-green-800'
-            case 'Yellow: geese, ducks and swans':
-                return 'bg-yellow-600 hover:bg-yellow-800'
-            case 'Red: herons, bats':
-                return 'bg-red-600 hover:bg-red-800'
-            case 'Purple: raptors':
-                return 'bg-purple-600 hover:bg-purple-800'
+        if (level.toLowerCase().includes("green")) {
+            return 'bg-green-600 hover:bg-green-800'
+        }else if (level.toLowerCase().includes("yellow")) {
+            return 'bg-yellow-600 hover:bg-yellow-800'
+        }else if (level.toLowerCase().includes("red")) {
+            return 'bg-red-600 hover:bg-red-800'
+        }else if (level.toLowerCase().includes("purple")) {
+            return 'bg-purple-600 hover:bg-purple-800'
+        }else {
+            return 'bg-gray-500 hover:bg-gray-800'
         }
     }
 
