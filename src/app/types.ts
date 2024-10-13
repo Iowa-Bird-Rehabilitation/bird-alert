@@ -11,6 +11,7 @@ interface BirdAlert {
     status: RescueStatus,
     birdStatus: BirdStatus,
     notes: String,
+    userNotes: String,
     rtLevel: RTLevel,
     skills: Skills[],
     possibleVolunteers: string[];
