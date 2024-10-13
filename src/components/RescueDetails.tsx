@@ -18,6 +18,7 @@ export default function RescueDetails({id}: { id: string }) {
     const [localRescuerName, setLocalRescuerName] = useState(rescuerName)
     const [formError, setFormError] = useState<string | null>(null)
     const [volunteers, setVolunteers] = useState<any[]>([])
+    const [userNoteValue, setUserNoteValue] = useState<String>()
 
     //connecting to airtable
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
@@ -54,6 +55,7 @@ export default function RescueDetails({id}: { id: string }) {
     useEffect(() => {
         fetchBirdRescues().then((b) => {
             setBirdRescue(b)
+            setUserNoteValue(b.userNotes)
         });
     }, []);
 
@@ -257,6 +259,7 @@ export default function RescueDetails({id}: { id: string }) {
     }
 
     const updateRescueInAirtable = async (id: string, fields: any) => {
+        console.log("ran")
         try {
             const updatedRecords = await base('Bird Alerts').update([
                 {
@@ -318,7 +321,7 @@ export default function RescueDetails({id}: { id: string }) {
                             </ul>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 pb-8">
                             <div className="flex items-center justify-between bg-stone-50 p-3 rounded-md">
                                 <div className="flex items-center overflow-hidden">
                                     <MapPinIcon className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
@@ -368,17 +371,16 @@ export default function RescueDetails({id}: { id: string }) {
 
                             <div className="flex items-center bg-stone-50 p-3 rounded-md">
                                 <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
-                                <h2 className='mr-2 text-nowrap'>Bird-Alert Notes:</h2>
-                                <p className=''>{birdRescue.notes}</p>
+                                <h2 className='mr-2'>Bird-Alert Notes: {birdRescue.notes}</h2>
                             </div>
 
-                            <div className="flex items-center bg-stone-50 p-3 rounded-md">
-                                <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
-                                <p>Volunteer Notes</p>
-                            </div>
-
-                            <div className="flex items-center bg-stone-50 p-3 rounded-md">
-                                <textarea onChange={(e) => updateRescueInAirtable(birdRescue.id, {UserNotes: e.target.value})} className='w-full h-40 resize-none'>{birdRescue.userNotes}</textarea>
+                            <div className="flex flex-col items-start bg-stone-50 p-3 rounded-md ">
+                                <div className="flex text-align-left items-center bg-stone-50 pb-4 pt-1 rounded-md">
+                                    <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
+                                    <p>Volunteer Notes:</p>
+                                </div>
+                                <textarea onChange={(e) => setUserNoteValue(e.target.value)} className='border-2 w-full h-40 p-2 rounded-md resize-none'>{birdRescue.userNotes}</textarea>
+                                <button onClick={() => updateRescueInAirtable(birdRescue.id, {UserNotes: userNoteValue})} className="w-36 bg-blue-600 text-sm hover:bg-blue-700 text-white mt-3 h-8 transition-colors duration-200 rounded-md "> Save Note</button>
                             </div>
                             
                                 
