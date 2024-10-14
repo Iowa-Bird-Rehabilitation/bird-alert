@@ -56,18 +56,21 @@ export default function BirdAlertList() {
                 destination: record.get('Drop Off Address') as string,
                 status: record.get('VolunteerStatus') as RescueStatus,
                 birdStatus: record.get('BirdStatus') as BirdStatus,
-                notes: record.get('Notes') as String,
-                userNotes: record.get("UserNotes") as String,
+                notes: record.get('Notes') as string,
+                userNotes: record.get("UserNotes") as string,
                 rtLevel: record.get('R&T Level') as RTLevel,
                 skills: record.get('Technical Skills') as Skills[],
                 possibleVolunteers: record.get("Possible Volunteers") as string[] ?? [],
                 currentVolunteer: record.get("CurrentVolunteer") as string,
+                secondVolunteer: record.get("SecondVolunteer") as string,
+                twoPersonRescue: record.get("TwoPersonRescue") as Boolean,
                 photo: record.get('Bird Photo') ? ((record.get('Bird Photo') as object[])[0] as {
                     url: string,
                     width: number,
                     height: number
                 }) : {} as { url: string, width: number, height: number },
             }))
+
 
             //sets state variable
             setBirdRescues(rescues)
@@ -76,6 +79,14 @@ export default function BirdAlertList() {
             setError('Failed to fetch bird rescues. Please try again later.')
         }
         setIsLoading(false)
+    }
+
+    function renderSecondVolunteerElements(rescue : BirdAlert) {
+        if (rescue.secondVolunteer && rescue.twoPersonRescue) {
+            return `, ${rescue.secondVolunteer.replace(",", "").split(' ').reverse().join(' ')}`
+        }else if (!rescue.secondVolunteer && rescue.twoPersonRescue && rescue.currentVolunteer) {
+            return `, SECOND VOLUNTEER NEEDED`
+        }
     }
 
 
@@ -110,7 +121,7 @@ export default function BirdAlertList() {
                                         <CommandEmpty>No statuses found.</CommandEmpty>
                                         <CommandGroup>
                                             {allStatuses.map((framework) => {
-                                                if (framework === "Delivered") {
+                                                if (framework === "Delivered" || framework === "Released On Site" || framework === "Incomplete") {
                                                     return
                                                 }
                                                 return (
@@ -161,7 +172,7 @@ export default function BirdAlertList() {
                                 // Show pending rescues first
                                 return allStatuses.indexOf(a.status) < allStatuses.indexOf(b.status) ? -1 : 1
                             }).map(rescue => {
-                                if (rescue.status === "Delivered" || rescue.status === "Incomplete") {return}
+                                if (rescue.status === "Delivered" || rescue.status === "Incomplete" || rescue.status === "Released On Site") {return}
                                 return (
                                     <Card key={rescue.id} className="overflow-hidden">
                                         <CardHeader className="p-4">
@@ -188,8 +199,12 @@ export default function BirdAlertList() {
                                                 </div>
                                                 <div className="flex items-center text-sm text-stone-600">
                                                     <UserCircle className="mr-2 h-4 w-4 flex-shrink-0"/>
-                                                    <span>Current Volunteer: <span
-                                                        className='bold-text'>{rescue.currentVolunteer ? rescue.currentVolunteer : "AVAILABLE"}</span> </span>
+                                                    <span>Current Volunteer: 
+                                                        <span className='bold-text'>
+                                                            {rescue.currentVolunteer ? rescue.currentVolunteer.replace(",", "").split(' ').reverse().join(' ') : ` AVAILABLE${rescue.twoPersonRescue && !rescue.currentVolunteer ? "(2)" : ""}`} 
+                                                            {renderSecondVolunteerElements(rescue)}                                                            
+                                                        </span> 
+                                                    </span>
                                                 </div>
                                             </div>
                                         </CardContent>
