@@ -9,7 +9,7 @@ import Airtable from 'airtable'
 import {Checkbox} from "@/components/ui/checkbox";
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command'
-import {cn} from "@/lib/utils";
+import {cn, formatFullName} from "@/lib/utils";
 import Link from "next/link";
 
 export default function BirdAlertList() {
@@ -71,7 +71,6 @@ export default function BirdAlertList() {
                 }) : {} as { url: string, width: number, height: number },
             }))
 
-
             //sets state variable
             setBirdRescues(rescues)
         } catch (error) {
@@ -82,13 +81,14 @@ export default function BirdAlertList() {
     }
 
     function renderSecondVolunteerElements(rescue : BirdAlert) {
-        if (rescue.secondVolunteer && rescue.twoPersonRescue) {
-            return `, ${rescue.secondVolunteer.replace(",", "").split(' ').reverse().join(' ')}`
-        }else if (!rescue.secondVolunteer && rescue.twoPersonRescue && rescue.currentVolunteer) {
+        if (!rescue.twoPersonRescue) return
+
+        if (rescue.secondVolunteer) {
+            return `, ${formatFullName(rescue.secondVolunteer)}`
+        }else if (!rescue.secondVolunteer && rescue.currentVolunteer) {
             return `, SECOND VOLUNTEER NEEDED`
         }
     }
-
 
     useEffect(() => {
         fetchBirdRescues()
@@ -120,29 +120,29 @@ export default function BirdAlertList() {
                                     <CommandList>
                                         <CommandEmpty>No statuses found.</CommandEmpty>
                                         <CommandGroup>
-                                            {allStatuses.map((framework) => {
-                                                if (framework === "Delivered" || framework === "Released On Site" || framework === "Incomplete") {
+                                            {allStatuses.map((status) => {
+                                                if (status === "Delivered" || status === "Released On Site" || status === "Incomplete") {
                                                     return
                                                 }
                                                 return (
                                                     <CommandItem
-                                                    key={framework}
-                                                    onSelect={(currentValue: any) => {
+                                                    key={status}
+                                                    onSelect={() => {
                                                         const newValue = new Set(value)
-                                                        if (newValue.has(framework)) {
-                                                            newValue.delete(framework)
+                                                        if (newValue.has(status)) {
+                                                            newValue.delete(status)
                                                         } else {
-                                                            newValue.add(framework)
+                                                            newValue.add(status)
                                                         }
                                                         setValue(newValue)
                                                         }}
                                                     >
                                                         <Checkbox
-                                                            checked={value.has(framework)}
+                                                            checked={value.has(status)}
                                                             className={cn(
                                                                 "mr-2 h-4 w-4"
                                                             )}/>
-                                                        {framework}
+                                                        {status}
                                                     </CommandItem>
                                                 )
                                             })}
@@ -201,7 +201,7 @@ export default function BirdAlertList() {
                                                     <UserCircle className="mr-2 h-4 w-4 flex-shrink-0"/>
                                                     <span>Current Volunteer: 
                                                         <span className='bold-text'>
-                                                            {rescue.currentVolunteer ? rescue.currentVolunteer.replace(",", "").split(' ').reverse().join(' ') : ` AVAILABLE${rescue.twoPersonRescue && !rescue.currentVolunteer ? "(2)" : ""}`} 
+                                                            {rescue.currentVolunteer ? formatFullName(rescue.currentVolunteer) : ` AVAILABLE${rescue.twoPersonRescue && !rescue.currentVolunteer ? "(2)" : ""}`} 
                                                             {renderSecondVolunteerElements(rescue)}                                                            
                                                         </span> 
                                                     </span>

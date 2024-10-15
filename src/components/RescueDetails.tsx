@@ -6,7 +6,7 @@ import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
 import Airtable from 'airtable'
 import Link from "next/link";
-import { useRouter } from 'next/navigation'
+import { formatFullName } from '@/lib/utils'
 
 export default function RescueDetails({id}: { id: string }) {
     //state variables
@@ -15,14 +15,12 @@ export default function RescueDetails({id}: { id: string }) {
     const [error, setError] = useState<string | null>(null)
     const [showAcceptForm, setShowAcceptForm] = useState(false)
     const [localRescuerName, setLocalRescuerName] = useState<string>("")
-    const [formError, setFormError] = useState<string | null>(null)
     const [volunteers, setVolunteers] = useState<any[]>([])
     const [userNoteValue, setUserNoteValue] = useState<string>()
 
     //connecting to airtable
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
     const base = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
-    const router = useRouter()
 
     const fetchBirdRescues = async () => {
         setError(null)
@@ -156,8 +154,6 @@ export default function RescueDetails({id}: { id: string }) {
                 console.error('Error updating bird status:', error)
                 setError('Failed to update bird status. Please try again.')
             }
-
-            // router.push("/")
         }
     }
 
@@ -260,9 +256,6 @@ export default function RescueDetails({id}: { id: string }) {
                                     {populateNameOptions()}
                                 </select>
                             </div>
-                            {formError && (
-                                <div className="text-red-500 text-sm">{formError}</div>
-                            )}
                             <Button disabled={!localRescuerName} type="submit"
                                     className="w-full bg-lime-600 hover:bg-lime-700 text-white">
                                 Accept Rescue
@@ -308,9 +301,11 @@ export default function RescueDetails({id}: { id: string }) {
     }
 
     function renderSecondVolunteerElements(rescue : BirdAlert) {
-        if (rescue.secondVolunteer && rescue.twoPersonRescue) {
-            return `, ${rescue.secondVolunteer.replace(",", "").split(' ').reverse().join(' ')}`
-        }else if (!rescue.secondVolunteer && rescue.twoPersonRescue && rescue.currentVolunteer) {
+        if (!rescue.twoPersonRescue) return
+
+        if (rescue.secondVolunteer) {
+            return `, ${formatFullName(rescue.secondVolunteer)}`
+        }else if (!rescue.secondVolunteer && rescue.currentVolunteer) {
             return `, SECOND VOLUNTEER NEEDED`
         }
     }
@@ -389,7 +384,7 @@ export default function RescueDetails({id}: { id: string }) {
                                 <CircleUser className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
                                 <span>Current Volunteer: 
                                     <span className='bold-text'>
-                                        {birdRescue.currentVolunteer ? birdRescue.currentVolunteer.replace(",", "").split(' ').reverse().join(' ') : ` AVAILABLE${birdRescue.twoPersonRescue && !birdRescue.currentVolunteer ? "(2)" : ""}`}
+                                        {birdRescue.currentVolunteer ? formatFullName(birdRescue.currentVolunteer) : ` AVAILABLE${birdRescue.twoPersonRescue && !birdRescue.currentVolunteer ? "(2)" : ""}`}
                                         {renderSecondVolunteerElements(birdRescue)}
                                     </span> 
                                 </span>
