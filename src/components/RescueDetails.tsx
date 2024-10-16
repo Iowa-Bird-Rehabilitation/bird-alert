@@ -6,7 +6,6 @@ import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
 import Airtable from 'airtable'
 import Link from "next/link";
-import { formatFullName } from '@/lib/utils'
 
 export default function RescueDetails({id}: { id: string }) {
     //state variables
@@ -304,7 +303,7 @@ export default function RescueDetails({id}: { id: string }) {
         if (!rescue.twoPersonRescue) return
 
         if (rescue.secondVolunteer) {
-            return `, ${formatFullName(rescue.secondVolunteer)}`
+            return `, ${rescue.secondVolunteer}`
         }else if (!rescue.secondVolunteer && rescue.currentVolunteer) {
             return `, SECOND VOLUNTEER NEEDED`
         }
@@ -382,9 +381,9 @@ export default function RescueDetails({id}: { id: string }) {
                             </div>
                             <div className="flex items-center bg-stone-50 p-3 rounded-md">
                                 <CircleUser className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
-                                <span>Current Volunteer: 
+                                <span>Current Volunteer:  
                                     <span className='bold-text'>
-                                        {birdRescue.currentVolunteer ? formatFullName(birdRescue.currentVolunteer) : ` AVAILABLE${birdRescue.twoPersonRescue && !birdRescue.currentVolunteer ? "(2)" : ""}`}
+                                        {birdRescue.currentVolunteer ? " " + birdRescue.currentVolunteer : ` AVAILABLE${birdRescue.twoPersonRescue && !birdRescue.currentVolunteer ? "(2)" : ""}`}
                                         {renderSecondVolunteerElements(birdRescue)}
                                     </span> 
                                 </span>

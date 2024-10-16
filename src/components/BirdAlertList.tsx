@@ -9,7 +9,7 @@ import Airtable from 'airtable'
 import {Checkbox} from "@/components/ui/checkbox";
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command'
-import {cn, formatFullName} from "@/lib/utils";
+import {cn} from "@/lib/utils";
 import Link from "next/link";
 
 export default function BirdAlertList() {
@@ -84,7 +84,7 @@ export default function BirdAlertList() {
         if (!rescue.twoPersonRescue) return
 
         if (rescue.secondVolunteer) {
-            return `, ${formatFullName(rescue.secondVolunteer)}`
+            return `, ${rescue.secondVolunteer}`
         }else if (!rescue.secondVolunteer && rescue.currentVolunteer) {
             return `, SECOND VOLUNTEER NEEDED`
         }
@@ -201,7 +201,7 @@ export default function BirdAlertList() {
                                                     <UserCircle className="mr-2 h-4 w-4 flex-shrink-0"/>
                                                     <span>Current Volunteer: 
                                                         <span className='bold-text'>
-                                                            {rescue.currentVolunteer ? formatFullName(rescue.currentVolunteer) : ` AVAILABLE${rescue.twoPersonRescue && !rescue.currentVolunteer ? "(2)" : ""}`} 
+                                                            {rescue.currentVolunteer ? " " + rescue.currentVolunteer : ` AVAILABLE${rescue.twoPersonRescue && !rescue.currentVolunteer ? "(2)" : ""}`} 
                                                             {renderSecondVolunteerElements(rescue)}                                                            
                                                         </span> 
                                                     </span>
