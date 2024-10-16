@@ -6,7 +6,7 @@ import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
 import Airtable from 'airtable'
 import Link from "next/link";
-import { useRouter } from 'next/navigation'
+import { formatFullName } from '@/lib/utils'
 
 export default function RescueDetails({id}: { id: string }) {
     //state variables
@@ -14,16 +14,13 @@ export default function RescueDetails({id}: { id: string }) {
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [showAcceptForm, setShowAcceptForm] = useState(false)
-    const [rescuerName, setRescuerName] = useState('')
-    const [localRescuerName, setLocalRescuerName] = useState(rescuerName)
-    const [formError, setFormError] = useState<string | null>(null)
+    const [localRescuerName, setLocalRescuerName] = useState<string>("")
     const [volunteers, setVolunteers] = useState<any[]>([])
-    const [userNoteValue, setUserNoteValue] = useState<String>()
+    const [userNoteValue, setUserNoteValue] = useState<string>()
 
     //connecting to airtable
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
     const base = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
-    const router = useRouter()
 
     const fetchBirdRescues = async () => {
         setError(null)
@@ -38,12 +35,14 @@ export default function RescueDetails({id}: { id: string }) {
             destination: record.get('Drop Off Address') as string,
             status: record.get('VolunteerStatus') as RescueStatus,
             birdStatus: record.get('BirdStatus') as BirdStatus,
-            notes: record.get("Notes") as String,
-            userNotes: record.get("UserNotes") as String,
+            notes: record.get("Notes") as string,
+            userNotes: record.get("UserNotes") as string,
             rtLevel: record.get('R&T Level') as RTLevel,
             skills: record.get('Technical Skills') as Skills[],
             possibleVolunteers: record.get("Possible Volunteers") as string[] ?? [],
             currentVolunteer: record.get("CurrentVolunteer") as string,
+            secondVolunteer: record.get("SecondVolunteer") as string,
+            twoPersonRescue: record.get("TwoPersonRescue") as Boolean,
             photo: record.get('Bird Photo') ? ((record.get('Bird Photo') as object[])[0] as {
                 url: string,
                 width: number,
@@ -155,8 +154,6 @@ export default function RescueDetails({id}: { id: string }) {
                 console.error('Error updating bird status:', error)
                 setError('Failed to update bird status. Please try again.')
             }
-
-            router.push("/")
         }
     }
 
@@ -164,9 +161,41 @@ export default function RescueDetails({id}: { id: string }) {
         setShowAcceptForm(true)
     }
 
+    function handleAcceptSecondVolunteerClick() {
+        setShowAcceptForm(true)
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const fields = {CurrentVolunteer: localRescuerName, VolunteerStatus: "In Route"}
+
+        //// This runs the secondary submit function if it is the second volunteer being chosen
+        if (birdRescue?.twoPersonRescue && birdRescue.currentVolunteer) {
+            handleSubmitSecondVolunteer(e)
+        }else {
+            const fields = {CurrentVolunteer: localRescuerName, VolunteerStatus: `${!birdRescue?.currentVolunteer && !birdRescue?.twoPersonRescue ? 'In Route' : "Pending"}`}
+            try {
+                const updatedRecords = await base('Bird Alerts').update([
+                    {
+                        id: birdRescue!.id,
+                        fields: fields
+                    }
+                ])
+                setShowAcceptForm(false)
+                const updatedBird = {...birdRescue} as BirdAlert
+                updatedBird.currentVolunteer = localRescuerName
+                if (updatedBird.currentVolunteer && !updatedBird.twoPersonRescue) {
+                    updatedBird.status = 'In Route'
+                }
+                setBirdRescue(updatedBird)
+            } catch {
+                throw error
+            }
+        }
+    }
+
+    const handleSubmitSecondVolunteer = async (e: React.FormEvent) => {
+        e.preventDefault()
+        const fields = {SecondVolunteer: localRescuerName, VolunteerStatus: `In Route`}
         try {
             const updatedRecords = await base('Bird Alerts').update([
                 {
@@ -176,9 +205,8 @@ export default function RescueDetails({id}: { id: string }) {
             ])
             setShowAcceptForm(false)
             const updatedBird = {...birdRescue} as BirdAlert
+            updatedBird.secondVolunteer = localRescuerName
             updatedBird.status = 'In Route'
-            updatedBird.currentVolunteer = localRescuerName
-
             setBirdRescue(updatedBird)
         } catch {
             throw error
@@ -222,15 +250,12 @@ export default function RescueDetails({id}: { id: string }) {
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div className="space-y-2">
                                 <Label className="block mb-2 text-sm font-medium text-gray-900"> Your Name</Label>
-                                <select required onChange={(e) => setLocalRescuerName(e.target.value)} name='name'
+                                <select required onChange={(e) => setLocalRescuerName(e.target.value) } name='name'
                                         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
                                     <option value={""}>-- Please Pick Your Name</option>
                                     {populateNameOptions()}
                                 </select>
                             </div>
-                            {formError && (
-                                <div className="text-red-500 text-sm">{formError}</div>
-                            )}
                             <Button disabled={!localRescuerName} type="submit"
                                     className="w-full bg-lime-600 hover:bg-lime-700 text-white">
                                 Accept Rescue
@@ -245,8 +270,9 @@ export default function RescueDetails({id}: { id: string }) {
     // this is what actually populates the list
     function populateNameOptions() {
         const volunteerOptions = volunteers.filter((vol: {
-            id: string
-        }) => birdRescue!.possibleVolunteers.includes(vol.id))
+            id: string,
+            name: string
+        }) => birdRescue!.possibleVolunteers.includes(vol.id) && vol.name !== birdRescue?.currentVolunteer)
         const volunteerOptionElements = volunteerOptions.map((vol: { id: string, name: string }, index: number) => {
             return (
                 <option key={index} value={vol.name}>
@@ -259,7 +285,6 @@ export default function RescueDetails({id}: { id: string }) {
     }
 
     const updateRescueInAirtable = async (id: string, fields: any) => {
-        console.log("ran")
         try {
             const updatedRecords = await base('Bird Alerts').update([
                 {
@@ -275,6 +300,16 @@ export default function RescueDetails({id}: { id: string }) {
         }
     }
 
+    function renderSecondVolunteerElements(rescue : BirdAlert) {
+        if (!rescue.twoPersonRescue) return
+
+        if (rescue.secondVolunteer) {
+            return `, ${formatFullName(rescue.secondVolunteer)}`
+        }else if (!rescue.secondVolunteer && rescue.currentVolunteer) {
+            return `, SECOND VOLUNTEER NEEDED`
+        }
+    }
+
     useEffect(() => {
         fetchVolunteers()
     }, [])
@@ -287,8 +322,8 @@ export default function RescueDetails({id}: { id: string }) {
         (
             <div className="p-4">
                 <div className="flex items-center">
-                    <Link className="mr-2" href={"/"}>
-                        <div><ArrowLeftIcon className="inline-block h-4 w-4"/> Back</div>
+                    <Link className="mr-2 mb-3" href={"/"}>
+                        <div><ArrowLeftIcon className="inline-block h-4 w-4 mb-1"/> Back</div>
                     </Link>
                 </div>
 
@@ -347,8 +382,11 @@ export default function RescueDetails({id}: { id: string }) {
                             </div>
                             <div className="flex items-center bg-stone-50 p-3 rounded-md">
                                 <CircleUser className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
-                                <span>Current Volunteer: <span
-                                    className='bold-text'>{birdRescue.currentVolunteer ? birdRescue.currentVolunteer : "AVAILABLE"}</span> 
+                                <span>Current Volunteer: 
+                                    <span className='bold-text'>
+                                        {birdRescue.currentVolunteer ? formatFullName(birdRescue.currentVolunteer) : ` AVAILABLE${birdRescue.twoPersonRescue && !birdRescue.currentVolunteer ? "(2)" : ""}`}
+                                        {renderSecondVolunteerElements(birdRescue)}
+                                    </span> 
                                 </span>
                             </div>
 
@@ -390,14 +428,21 @@ export default function RescueDetails({id}: { id: string }) {
                                 showAcceptForm &&
                                 acceptForm()
                             }
-                            {birdRescue.status === 'Pending' && (
+                            {birdRescue.status === 'Pending' && !birdRescue.currentVolunteer && (
                                 <Button
                                     className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors duration-200"
                                     onClick={handleAcceptClick}>
                                     Accept Rescue
                                 </Button>
                             )}
-                            {birdRescue.status === 'In Route' && (
+                            {birdRescue.status === 'Pending' && birdRescue.currentVolunteer && !birdRescue.secondVolunteer && birdRescue.twoPersonRescue && (
+                                <Button
+                                    className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors duration-200"
+                                    onClick={handleAcceptSecondVolunteerClick}>
+                                    Accept Rescue (Second Volunteer)
+                                </Button>
+                            )}
+                            {birdRescue.status === 'In Route' &&  (
                                 <Button
                                     className="w-full bg-red-700 hover:bg-red-800 text-white transition-colors duration-200"
                                     onClick={() => handleVolunteerStatusChange('Rescued')}>

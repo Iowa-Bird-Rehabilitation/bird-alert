@@ -9,7 +9,7 @@ import Airtable from 'airtable'
 import {Checkbox} from "@/components/ui/checkbox";
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command'
-import {cn} from "@/lib/utils";
+import {cn, formatFullName} from "@/lib/utils";
 import Link from "next/link";
 
 export default function BirdAlertList() {
@@ -56,12 +56,14 @@ export default function BirdAlertList() {
                 destination: record.get('Drop Off Address') as string,
                 status: record.get('VolunteerStatus') as RescueStatus,
                 birdStatus: record.get('BirdStatus') as BirdStatus,
-                notes: record.get('Notes') as String,
-                userNotes: record.get("UserNotes") as String,
+                notes: record.get('Notes') as string,
+                userNotes: record.get("UserNotes") as string,
                 rtLevel: record.get('R&T Level') as RTLevel,
                 skills: record.get('Technical Skills') as Skills[],
                 possibleVolunteers: record.get("Possible Volunteers") as string[] ?? [],
                 currentVolunteer: record.get("CurrentVolunteer") as string,
+                secondVolunteer: record.get("SecondVolunteer") as string,
+                twoPersonRescue: record.get("TwoPersonRescue") as Boolean,
                 photo: record.get('Bird Photo') ? ((record.get('Bird Photo') as object[])[0] as {
                     url: string,
                     width: number,
@@ -78,6 +80,15 @@ export default function BirdAlertList() {
         setIsLoading(false)
     }
 
+    function renderSecondVolunteerElements(rescue : BirdAlert) {
+        if (!rescue.twoPersonRescue) return
+
+        if (rescue.secondVolunteer) {
+            return `, ${formatFullName(rescue.secondVolunteer)}`
+        }else if (!rescue.secondVolunteer && rescue.currentVolunteer) {
+            return `, SECOND VOLUNTEER NEEDED`
+        }
+    }
 
     useEffect(() => {
         fetchBirdRescues()
@@ -109,29 +120,29 @@ export default function BirdAlertList() {
                                     <CommandList>
                                         <CommandEmpty>No statuses found.</CommandEmpty>
                                         <CommandGroup>
-                                            {allStatuses.map((framework) => {
-                                                if (framework === "Delivered") {
+                                            {allStatuses.map((status) => {
+                                                if (status === "Delivered" || status === "Released On Site" || status === "Incomplete") {
                                                     return
                                                 }
                                                 return (
                                                     <CommandItem
-                                                    key={framework}
-                                                    onSelect={(currentValue: any) => {
+                                                    key={status}
+                                                    onSelect={() => {
                                                         const newValue = new Set(value)
-                                                        if (newValue.has(framework)) {
-                                                            newValue.delete(framework)
+                                                        if (newValue.has(status)) {
+                                                            newValue.delete(status)
                                                         } else {
-                                                            newValue.add(framework)
+                                                            newValue.add(status)
                                                         }
                                                         setValue(newValue)
                                                         }}
                                                     >
                                                         <Checkbox
-                                                            checked={value.has(framework)}
+                                                            checked={value.has(status)}
                                                             className={cn(
                                                                 "mr-2 h-4 w-4"
                                                             )}/>
-                                                        {framework}
+                                                        {status}
                                                     </CommandItem>
                                                 )
                                             })}
@@ -161,7 +172,7 @@ export default function BirdAlertList() {
                                 // Show pending rescues first
                                 return allStatuses.indexOf(a.status) < allStatuses.indexOf(b.status) ? -1 : 1
                             }).map(rescue => {
-                                if (rescue.status === "Delivered" || rescue.status === "Incomplete") {return}
+                                if (rescue.status === "Delivered" || rescue.status === "Incomplete" || rescue.status === "Released On Site") {return}
                                 return (
                                     <Card key={rescue.id} className="overflow-hidden">
                                         <CardHeader className="p-4">
@@ -188,8 +199,12 @@ export default function BirdAlertList() {
                                                 </div>
                                                 <div className="flex items-center text-sm text-stone-600">
                                                     <UserCircle className="mr-2 h-4 w-4 flex-shrink-0"/>
-                                                    <span>Current Volunteer: <span
-                                                        className='bold-text'>{rescue.currentVolunteer ? rescue.currentVolunteer : "AVAILABLE"}</span> </span>
+                                                    <span>Current Volunteer: 
+                                                        <span className='bold-text'>
+                                                            {rescue.currentVolunteer ? formatFullName(rescue.currentVolunteer) : ` AVAILABLE${rescue.twoPersonRescue && !rescue.currentVolunteer ? "(2)" : ""}`} 
+                                                            {renderSecondVolunteerElements(rescue)}                                                            
+                                                        </span> 
+                                                    </span>
                                                 </div>
                                             </div>
                                         </CardContent>
