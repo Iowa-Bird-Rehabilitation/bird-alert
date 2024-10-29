@@ -68,6 +68,12 @@ export default function RescueDetails({id}: { id: string }) {
                 return 'bg-violet-700 hover:bg-violet-800'
             case 'Delivered':
                 return 'bg-teal-700 hover:bg-teal-800'
+            case 'Incomplete':
+                return 'bg-red-600 hover:bg-red-700'
+            case 'Released On Site':
+                return 'bg-pink-500 hover:bg-pink-600'
+            default:
+                return 'bg-gray-800 hover:bg-gray-900'
         }
     }
 
@@ -128,12 +134,15 @@ export default function RescueDetails({id}: { id: string }) {
             try {
 
                 let updatedFields
+                let newVolunteerStatus : RescueStatus = birdRescue.status
                 if (newBirdStatus === "Assessed" || newBirdStatus === "Died" || newBirdStatus === "No Show") {
-                    let newVolunteerStatus = "Incomplete"
+                    newVolunteerStatus = "Incomplete"
                     updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
                 }else if (newBirdStatus === "Rescued - Released") {
-                    let newVolunteerStatus = "Released On Site"
+                    newVolunteerStatus = "Released On Site"
                     updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
+                }else {
+                    updatedFields = {BirdStatus: undefined, VolunteerStatus: birdRescue.status}
                 }
 
                 // update airtable column
@@ -147,6 +156,7 @@ export default function RescueDetails({id}: { id: string }) {
                 }
 
                 updatedBird.birdStatus = newBirdStatus
+                updatedBird.status = newVolunteerStatus
                 setBirdRescue(updatedBird)
 
             }catch (error) {
