@@ -4,7 +4,7 @@ import {Button} from '@/components/ui/button'
 import {Label} from '@/components/ui/label'
 import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
-import Airtable from 'airtable'
+import Airtable, { base } from 'airtable'
 import Link from "next/link";
 
 export default function RescueDetails({id}: { id: string }) {
@@ -19,12 +19,12 @@ export default function RescueDetails({id}: { id: string }) {
 
     //connecting to airtable
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
-    const base = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
+    const airtableBase = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
 
     const fetchBirdRescues = async () => {
         setError(null)
         // airtable fetch
-        const record = await base('Bird Alerts').find(id)
+        const record = await airtableBase('Bird Alerts').find(id)
 
         //conversion
         return {
@@ -56,6 +56,7 @@ export default function RescueDetails({id}: { id: string }) {
             setUserNoteValue(b.userNotes)
         });
     }, []);
+
 
     // colors for the statuses that correspond to the airtable colors in the 'VolunteerStatus' column
     const getStatusColor = (status: RescueStatus) => {
@@ -183,7 +184,7 @@ export default function RescueDetails({id}: { id: string }) {
         }else {
             const fields = {CurrentVolunteer: localRescuerName, VolunteerStatus: `${!birdRescue?.currentVolunteer && !birdRescue?.twoPersonRescue ? 'In Route' : "Pending"}`}
             try {
-                const updatedRecords = await base('Bird Alerts').update([
+                const updatedRecords = await airtableBase('Bird Alerts').update([
                     {
                         id: birdRescue!.id,
                         fields: fields
@@ -206,7 +207,7 @@ export default function RescueDetails({id}: { id: string }) {
         e.preventDefault()
         const fields = {SecondVolunteer: localRescuerName, VolunteerStatus: `In Route`}
         try {
-            const updatedRecords = await base('Bird Alerts').update([
+            const updatedRecords = await airtableBase('Bird Alerts').update([
                 {
                     id: birdRescue!.id,
                     fields: fields
@@ -227,12 +228,24 @@ export default function RescueDetails({id}: { id: string }) {
         setIsLoading(true)
         setError(null)
         try {
-            const records = await base('Rescue and Transport Team').select().all()
-            const volunteers = records.map((record: any) => ({
-                id: record.get('_id') as string,
-                name: record.get('Name') as string
-            }))
-            setVolunteers(volunteers)
+            const records = airtableBase('Rescue and Transport Team').select({
+                view: 'Volunteer Names & ID Only',
+                fields: ["Name", "_id"]
+            })
+
+            /// Airtable has a weird type of fieldSet that causes issues with all of the typing and I cant seem to figure it out, so I just made this one type of any
+            const volunteersData : any[] = []
+            await records.eachPage((records, processNextPage) => {
+                records.forEach(({fields, id}) => {
+                    volunteersData.push({
+                        id: fields._id as string,
+                        name: fields.Name as string
+                    })
+                })
+                processNextPage()
+            })
+
+            setVolunteers(volunteersData)
         } catch (error) {
             console.error('Error fetching bird rescues:', error)
             setError('Failed to fetch bird rescues. Please try again later.')
@@ -278,10 +291,9 @@ export default function RescueDetails({id}: { id: string }) {
 
     // this is what actually populates the list
     function populateNameOptions() {
-        const volunteerOptions = volunteers.filter((vol: {
-            id: string,
-            name: string
-        }) => birdRescue!.possibleVolunteers.includes(vol.id) && vol.name !== birdRescue?.currentVolunteer)
+        
+        const volunteerOptions = volunteers.filter((vol: {id: string, name: string}) => birdRescue!.possibleVolunteers.includes(vol.id) && vol.name !== birdRescue?.currentVolunteer)
+        console.log(volunteerOptions)
         const volunteerOptionElements = volunteerOptions.map((vol: { id: string, name: string }, index: number) => {
             return (
                 <option key={index} value={vol.name}>
@@ -295,7 +307,7 @@ export default function RescueDetails({id}: { id: string }) {
 
     const updateRescueInAirtable = async (id: string, fields: any) => {
         try {
-            const updatedRecords = await base('Bird Alerts').update([
+            const updatedRecords = await airtableBase('Bird Alerts').update([
                 {
                     id,
                     fields: fields

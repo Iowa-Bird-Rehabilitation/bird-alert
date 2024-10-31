@@ -24,7 +24,7 @@ export default function BirdAlertList() {
 
     // connection to airtable and the Bird Alert table.
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
-    const base = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
+    const airtableBase = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
 
     // colors for status
     const getStatusColor = (status: RescueStatus) => {
@@ -46,30 +46,54 @@ export default function BirdAlertList() {
         setError(null)
         try {
             // airtable fetch
-            const records = await base('Bird Alerts').select().all()
+            const records = airtableBase('Bird Alerts').select({
+                fields: [
+                    "_id",
+                    "TypeOfBird",
+                    "FullPickUpAddress",
+                    "DropOffAddress",
+                    "VolunteerStatus",
+                    "BirdStatus",
+                    "Notes",
+                    "UserNotes",
+                    "RTLevel",
+                    "TechnicalSkills",
+                    "PossibleVolunteers",
+                    "CurrentVolunteer",
+                    "SecondVolunteer",
+                    "TwoPersonRescue",
+                    "BirdPhoto"
+                ]
+            })
 
-            //conversion
-            const rescues: BirdAlert[] = records.map((record) => ({
-                id: record.get('_id') as string,
-                species: record.get('Type of Bird') as string,
-                location: record.get('Full Pick Up Address') as string,
-                destination: record.get('Drop Off Address') as string,
-                status: record.get('VolunteerStatus') as RescueStatus,
-                birdStatus: record.get('BirdStatus') as BirdStatus,
-                notes: record.get('Notes') as string,
-                userNotes: record.get("UserNotes") as string,
-                rtLevel: record.get('R&T Level') as RTLevel,
-                skills: record.get('Technical Skills') as Skills[],
-                possibleVolunteers: record.get("Possible Volunteers") as string[] ?? [],
-                currentVolunteer: record.get("CurrentVolunteer") as string,
-                secondVolunteer: record.get("SecondVolunteer") as string,
-                twoPersonRescue: record.get("TwoPersonRescue") as Boolean,
-                photo: record.get('Bird Photo') ? ((record.get('Bird Photo') as object[])[0] as {
-                    url: string,
-                    width: number,
-                    height: number
-                }) : {} as { url: string, width: number, height: number },
-            }))
+            const rescues : BirdAlert[] = []
+
+            await records.eachPage((records, processNextPage) => {
+                records.forEach(({fields}) => {
+                    rescues.push({
+                        id: fields._id as string,
+                        species: fields.TypeOfBird as string,
+                        location: fields.FullPickUpAddress as string,
+                        destination: fields.DropOffAddress as string,
+                        status: fields.VolunteerStatus as RescueStatus,
+                        birdStatus: fields.BirdStatus as BirdStatus,
+                        notes: fields.Notes as string,
+                        userNotes: fields.UserNotes as string,
+                        rtLevel: fields.RTLevel as RTLevel,
+                        skills: fields.TechnicalSkills as Skills[],
+                        possibleVolunteers: fields.PossibleVolunteers as string[] ?? [],
+                        currentVolunteer: fields.CurrentVolunteer as string,
+                        secondVolunteer: fields.SecondVolunteer as string,
+                        twoPersonRescue: fields.TwoPersonRescue as Boolean,
+                        photo: fields.BirdPhoto ? ((fields.BirdPhoto as object[])[0] as {
+                            url: string,
+                            width: number,
+                            height: number
+                        }) : {} as { url: string, width: number, height: number },
+                    })
+                })
+                processNextPage()
+            })
 
             //sets state variable
             setBirdRescues(rescues)
