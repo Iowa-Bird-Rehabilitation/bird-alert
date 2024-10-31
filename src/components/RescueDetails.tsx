@@ -29,20 +29,20 @@ export default function RescueDetails({id}: { id: string }) {
         //conversion
         return {
             id: record.get('_id') as string,
-            species: record.get('Type of Bird') as string,
-            location: record.get('Full Pick Up Address') as string,
-            destination: record.get('Drop Off Address') as string,
+            species: record.get('TypeOfBird') as string,
+            location: record.get('FullPickUpAddress') as string,
+            destination: record.get('DropOffAddress') as string,
             status: record.get('VolunteerStatus') as RescueStatus,
             birdStatus: record.get('BirdStatus') as BirdStatus,
             notes: record.get("Notes") as string,
             userNotes: record.get("UserNotes") as string,
-            rtLevel: record.get('R&T Level') as RTLevel,
-            skills: record.get('Technical Skills') as Skills[],
-            possibleVolunteers: record.get("Possible Volunteers") as string[] ?? [],
+            rtLevel: record.get('RTLevel') as RTLevel,
+            skills: record.get('TechnicalSkills') as Skills[],
+            possibleVolunteers: record.get("PossibleVolunteers") as string[] ?? [],
             currentVolunteer: record.get("CurrentVolunteer") as string,
             secondVolunteer: record.get("SecondVolunteer") as string,
             twoPersonRescue: record.get("TwoPersonRescue") as Boolean,
-            photo: record.get('Bird Photo') ? ((record.get('Bird Photo') as object[])[0] as {
+            photo: record.get('BirdPhoto') ? ((record.get('BirdPhoto') as object[])[0] as {
                 url: string,
                 width: number,
                 height: number
@@ -293,7 +293,6 @@ export default function RescueDetails({id}: { id: string }) {
     function populateNameOptions() {
         
         const volunteerOptions = volunteers.filter((vol: {id: string, name: string}) => birdRescue!.possibleVolunteers.includes(vol.id) && vol.name !== birdRescue?.currentVolunteer)
-        console.log(volunteerOptions)
         const volunteerOptionElements = volunteerOptions.map((vol: { id: string, name: string }, index: number) => {
             return (
                 <option key={index} value={vol.name}>
