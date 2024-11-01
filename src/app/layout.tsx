@@ -10,6 +10,7 @@ import awsExports from "../aws-exports"
 import '@aws-amplify/ui-react/styles.css';
 import { Authenticator } from "@aws-amplify/ui-react";
 
+
 const inter = Inter({ subsets: ["latin"] });
 Amplify.configure({ ...awsExports });
 
@@ -36,10 +37,28 @@ export default function RootLayout({
         <meta name="description" content="​Wild birds play a critical role in our ecosystem, and with the population of birds in decline, now is the time to make changes. At IBR, we not only want to support our community in providing a place to take injured and orphaned wild birds, but also provide education, outreach, and be a beacon for wildlife conservation." />
       </head>
       <body className="content-center items-center" >
+        <Card className=" bg-center text-white bg-cover rounded-none flex justify-between items-center absolute right-0 left-0 top-0 w-100" style={{ backgroundImage: "url('../images/birds.jpg')" }}>
+          <div>
+            <CardTitle className="text-2xl font-bold px-6 pt-12"><Image
+                src="/images/logo.png"
+                width={70}
+                height={70}
+                className={"float-left pr-2"}
+                alt="Iowa Bird Rehabilitation Logo"
+            />
+              Iowa Bird Rehabilitation</CardTitle>
+            <CardContent>
+              <div className="flex items-center text-sm text-stone-300 pb-6">
+                <span>Creating a future for our feathered friends.</span>
+              </div>
+            </CardContent>
+          </div>
+        </Card>
+            
         <Authenticator formFields={formFields}>
           {({ signOut, user }) => (
           <div>
-            <Card className="bg-fill bg-center text-white rounded-none flex justify-between items-center" style={{ backgroundImage: "url('../images/birds.jpg')" }}>
+            {/* <Card className="bg-fill bg-center text-white rounded-none flex justify-between items-center" style={{ backgroundImage: "url('../images/birds.jpg')" }}>
               <div>
                 <CardTitle className="text-2xl font-bold px-6 pt-12"><Image
                     src="/images/logo.png"
@@ -60,10 +79,14 @@ export default function RootLayout({
                 <p className="mb-2 text-stone-300">Current User: {user?.username}</p>
                 <button className="w-32 py-1 rounded-md bg-red-700 hover:bg-red-800 text-white transition-colors duration-200" onClick={signOut}>Sign out</button>
               </div>
-            </Card>
+            </Card> */}
+
+            <div className="mr-6 absolute top-10 right-0 mt-3">
+              <p className="mb-2 text-stone-300">Current User: {user?.username}</p>
+              <button className="w-32 py-1 rounded-md bg-red-700 hover:bg-red-800 text-white transition-colors duration-200" onClick={signOut}>Sign out</button>
+            </div>
             
-            <div className={inter.className}>
-              
+            <div className={`${inter.className} pt-40`}>  
               {children}
             </div>
             <Card key="emergency"
