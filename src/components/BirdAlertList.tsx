@@ -1,6 +1,6 @@
 'use client'
 
-import {ChevronsUpDown, HomeIcon, MapPinIcon, UserCircle} from 'lucide-react'
+import {ChevronsUpDown, Clock, HomeIcon, MapPinIcon, UserCircle} from 'lucide-react'
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from '@/components/ui/card'
 import {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
@@ -9,7 +9,7 @@ import Airtable from 'airtable'
 import {Checkbox} from "@/components/ui/checkbox";
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command'
-import {cn} from "@/lib/utils";
+import {cn, formatDate, formatTime} from "@/lib/utils";
 import Link from "next/link";
 
 export default function BirdAlertList() {
@@ -62,7 +62,8 @@ export default function BirdAlertList() {
                     "CurrentVolunteer",
                     "SecondVolunteer",
                     "TwoPersonRescue",
-                    "BirdPhoto"
+                    "BirdPhoto",
+                    "Created"
                 ]
             })
 
@@ -90,6 +91,7 @@ export default function BirdAlertList() {
                             width: number,
                             height: number
                         }) : {} as { url: string, width: number, height: number },
+                        created: fields.Created as string
                     })
                 })
                 processNextPage()
@@ -213,6 +215,7 @@ export default function BirdAlertList() {
                                         </CardHeader>
                                         <CardContent className="p-4">
                                             <div className="space-y-2">
+                                                
                                                 <div className="flex items-center text-sm text-stone-600">
                                                     <MapPinIcon className="mr-2 h-4 w-4 flex-shrink-0"/>
                                                     <span className="truncate">{rescue.location}</span>
@@ -229,6 +232,10 @@ export default function BirdAlertList() {
                                                             {renderSecondVolunteerElements(rescue)}                                                            
                                                         </span> 
                                                     </span>
+                                                </div>
+                                                <div className="flex items-center text-sm text-stone-600">
+                                                    <Clock className="mr-2 h-4 w-4 flex-shrink-0"/>
+                                                    <span className="truncate">Date & Time of Alert: <span className='bold-text'>{formatDate(rescue.created)}  {formatTime(rescue.created)}</span></span>
                                                 </div>
                                             </div>
                                         </CardContent>
