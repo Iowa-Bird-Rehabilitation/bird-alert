@@ -1,4 +1,4 @@
-import {ArrowLeftIcon, CircleUser, HomeIcon, MapPinIcon, Notebook, XIcon} from 'lucide-react'
+import {ArrowLeftIcon, BadgeInfo, CircleUser, HomeIcon, MapPinIcon, Notebook, XIcon} from 'lucide-react'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Label} from '@/components/ui/label'
@@ -365,9 +365,18 @@ export default function RescueDetails({id}: { id: string }) {
                             height={birdRescue.photo['height']}
                             alt={birdRescue.species}
                             className="rounded-md shadow-md w-full md:w-2/4 float-left md:mr-8 md:mb-8"/>
-                        <Badge variant="secondary" className={`${getRTLevelColor(birdRescue.rtLevel)} text-white`}>
+                        <Badge variant="secondary" className={`${getRTLevelColor(birdRescue.rtLevel)} text-white mr-2`}>
                             {birdRescue.rtLevel}
                         </Badge>
+                        {
+                            birdRescue.twoPersonRescue ?
+                                <Badge variant="secondary" className={`bg-violet-700 hover:bg-violet-800 text-white`}>
+                                    Two Person Rescue
+                                </Badge>
+                            :
+                                <></>
+                        }
+                        
 
                         <div className="">
                             <span className="font-bold text-black">Technical Skills:</span>
@@ -410,8 +419,8 @@ export default function RescueDetails({id}: { id: string }) {
                                 </span>
                             </div>
 
-                            
-                            {
+                            {/* We are keeping this code here as we may still use this dropdown, for now we are instead using the additional status section that was added */}
+                            {/* {
                                 birdRescue.status === "Pending" ?
                                     <></>
                                 :
@@ -425,11 +434,23 @@ export default function RescueDetails({id}: { id: string }) {
                                             <option value={"Assessed"}> Assessed </option>
                                         </select>
                                     </div>
-                            }
+                            } */}
 
                             <div className="flex items-center bg-stone-50 p-3 rounded-md">
                                 <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
                                 <h2 className='mr-2'>Bird-Alert Notes: {birdRescue.notes}</h2>
+                            </div>
+
+                            <div className="flex flex-col content-center items-start bg-stone-50 p-3 rounded-md">
+                                <div className='flex items-center mb-4'>
+                                    <BadgeInfo className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
+                                    <h2 className='mr-2'><span className='font-bold'>Additional Statuses: </span>If applicable please add in the notes below</h2>
+                                </div>
+                                
+                                <p className='ml-7'><span className='font-bold'>Rescued - Released:</span> Bird released on site, no further help needed.</p>
+                                <p className='ml-7'><span className='font-bold'>No Show:</span> Bird was not there or no longer in area.</p>
+                                <p className='ml-7'><span className='font-bold'>Assessed:</span> Situation assessed, further help needed at a later time.</p>
+                                <p className='ml-7'><span className='font-bold'>Died:</span> The Bird has died on scene.</p>
                             </div>
 
                             <div className="flex flex-col items-start bg-stone-50 p-3 rounded-md ">
