@@ -1,4 +1,4 @@
-import {ArrowLeftIcon, BadgeInfo, CircleUser, HomeIcon, MapPinIcon, Notebook, XIcon} from 'lucide-react'
+import {ArrowLeftIcon, BadgeInfo, CircleUser, HomeIcon, MapPinIcon, Notebook, WineOff, XIcon} from 'lucide-react'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Label} from '@/components/ui/label'
@@ -21,7 +21,7 @@ export default function RescueDetails({id}: { id: string }) {
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
     const airtableBase = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
 
-    const fetchBirdRescues = async () => {
+    const fetchBirdRescue = async () => {
         setError(null)
         // airtable fetch
         const record = await airtableBase('Bird Alerts').find(id)
@@ -51,7 +51,7 @@ export default function RescueDetails({id}: { id: string }) {
     }
 
     useEffect(() => {
-        fetchBirdRescues().then((b) => {
+        fetchBirdRescue().then((b) => {
             setBirdRescue(b)
             setUserNoteValue(b.userNotes)
         });
@@ -128,44 +128,44 @@ export default function RescueDetails({id}: { id: string }) {
 
     }
 
-    ///// handle the change of the bird status
-    const handleBirdStatusChange = async (newBirdStatus : BirdStatus) => {
+    ///// handle the change of the bird status currently not in use LEAVE CODE HERE
+    // const handleBirdStatusChange = async (newBirdStatus : BirdStatus) => {
 
-        if (birdRescue) {
-            try {
+    //     if (birdRescue) {
+    //         try {
 
-                let updatedFields
-                let newVolunteerStatus : RescueStatus = birdRescue.status
-                if (newBirdStatus === "Assessed" || newBirdStatus === "Died" || newBirdStatus === "No Show") {
-                    newVolunteerStatus = "Incomplete"
-                    updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
-                }else if (newBirdStatus === "Rescued - Released") {
-                    newVolunteerStatus = "Released On Site"
-                    updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
-                }else {
-                    updatedFields = {BirdStatus: undefined, VolunteerStatus: birdRescue.status}
-                }
+    //             let updatedFields
+    //             let newVolunteerStatus : RescueStatus = birdRescue.status
+    //             if (newBirdStatus === "Assessed" || newBirdStatus === "Died" || newBirdStatus === "No Show") {
+    //                 newVolunteerStatus = "Incomplete"
+    //                 updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
+    //             }else if (newBirdStatus === "Rescued - Released") {
+    //                 newVolunteerStatus = "Released On Site"
+    //                 updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
+    //             }else {
+    //                 updatedFields = {BirdStatus: undefined, VolunteerStatus: birdRescue.status}
+    //             }
 
-                // update airtable column
-                if (birdRescue.currentVolunteer) {
-                    await updateRescueInAirtable(birdRescue.id, updatedFields)
-                }
+    //             // update airtable column
+    //             if (birdRescue.currentVolunteer) {
+    //                 await updateRescueInAirtable(birdRescue.id, updatedFields)
+    //             }
                 
-                // update the bird in BirdAlertList so that it has the new status
-                const updatedBird = {
-                    ...birdRescue
-                }
+    //             // update the bird in BirdAlertList so that it has the new status
+    //             const updatedBird = {
+    //                 ...birdRescue
+    //             }
 
-                updatedBird.birdStatus = newBirdStatus
-                updatedBird.status = newVolunteerStatus
-                setBirdRescue(updatedBird)
+    //             updatedBird.birdStatus = newBirdStatus
+    //             updatedBird.status = newVolunteerStatus
+    //             setBirdRescue(updatedBird)
 
-            }catch (error) {
-                console.error('Error updating bird status:', error)
-                setError('Failed to update bird status. Please try again.')
-            }
-        }
-    }
+    //         }catch (error) {
+    //             console.error('Error updating bird status:', error)
+    //             setError('Failed to update bird status. Please try again.')
+    //         }
+    //     }
+    // }
 
     function handleAcceptClick() {
         setShowAcceptForm(true)
@@ -177,6 +177,11 @@ export default function RescueDetails({id}: { id: string }) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if ((await fetchBirdRescue()).currentVolunteer) {
+            window.alert("Another user has already claimed this Bird Alert, please refresh your page to see the updated data.")
+            return
+        }
 
         //// This runs the secondary submit function if it is the second volunteer being chosen
         if (birdRescue?.twoPersonRescue && birdRescue.currentVolunteer) {
@@ -205,6 +210,12 @@ export default function RescueDetails({id}: { id: string }) {
 
     const handleSubmitSecondVolunteer = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if ((await fetchBirdRescue()).currentVolunteer) {
+            window.alert("Both spots have been claimed by other volunteers. Please refresh your page to see the updated data.")
+            return
+        }
+
         const fields = {SecondVolunteer: localRescuerName, VolunteerStatus: `In Route`}
         try {
             const updatedRecords = await airtableBase('Bird Alerts').update([
