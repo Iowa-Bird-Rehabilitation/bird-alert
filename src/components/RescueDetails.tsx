@@ -1,4 +1,4 @@
-import {ArrowLeftIcon, BadgeInfo, CircleUser, HomeIcon, MapPinIcon, Notebook, WineOff, XIcon} from 'lucide-react'
+import {ArrowLeftIcon, BadgeInfo, CircleUser, Clock, HomeIcon, MapPinIcon, Notebook, WineOff, XIcon} from 'lucide-react'
 import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Label} from '@/components/ui/label'
@@ -6,6 +6,7 @@ import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
 import Airtable, { base } from 'airtable'
 import Link from "next/link";
+import { formatDate, formatTime } from '@/lib/utils'
 
 export default function RescueDetails({id}: { id: string }) {
     //state variables
@@ -47,6 +48,7 @@ export default function RescueDetails({id}: { id: string }) {
                 width: number,
                 height: number
             }) : {} as { url: string, width: number, height: number },
+            created: record.get('Created') as string
         } as BirdAlert
     }
 
@@ -418,7 +420,6 @@ export default function RescueDetails({id}: { id: string }) {
                                             className="float-left truncate hover:underline">{birdRescue.destination}</span>
                                     </a>
                                 </div>
-
                             </div>
                             <div className="flex items-center bg-stone-50 p-3 rounded-md">
                                 <CircleUser className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
@@ -448,6 +449,11 @@ export default function RescueDetails({id}: { id: string }) {
                             } */}
 
                             <div className="flex items-center bg-stone-50 p-3 rounded-md">
+                                <Clock className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
+                                <h2 className='mr-2'>Date & Time of Alert: <span className='bold-text'>{formatDate(birdRescue.created)} {formatTime(birdRescue.created)}</span></h2>
+                            </div>
+
+                            <div className="flex items-center bg-stone-50 p-3 rounded-md">
                                 <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
                                 <h2 className='mr-2'>Bird-Alert Notes: {birdRescue.notes}</h2>
                             </div>
@@ -455,7 +461,7 @@ export default function RescueDetails({id}: { id: string }) {
                             <div className="flex flex-col content-center items-start bg-stone-50 p-3 rounded-md">
                                 <div className='flex items-center mb-4'>
                                     <BadgeInfo className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
-                                    <h2 className='mr-2'><span className='font-bold'>Additional Statuses: </span>If applicable please add in the notes below</h2>
+                                    <h2 className='mr-2'><span className='font-bold'>Additional Statuses: </span>If applicable please add in the notes below and contact IBR</h2>
                                 </div>
                                 
                                 <p className='ml-7'><span className='font-bold'>Rescued - Released:</span> Bird released on site, no further help needed.</p>

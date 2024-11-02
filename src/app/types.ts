@@ -19,4 +19,5 @@ interface BirdAlert {
     secondVolunteer: string,
     twoPersonRescue: Boolean,
     photo: { url: string, width: number, height: number },
+    created: string
 }
