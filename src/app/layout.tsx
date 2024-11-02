@@ -58,36 +58,18 @@ export default function RootLayout({
         <Authenticator formFields={formFields}>
           {({ signOut, user }) => (
           <div>
-            {/* <Card className="bg-fill bg-center text-white rounded-none flex justify-between items-center" style={{ backgroundImage: "url('../images/birds.jpg')" }}>
-              <div>
-                <CardTitle className="text-2xl font-bold px-6 pt-12"><Image
-                    src="/images/logo.png"
-                    width={70}
-                    height={70}
-                    className={"float-left pr-2"}
-                    alt="Iowa Bird Rehabilitation Logo"
-                />
-                  Iowa Bird Rehabilitation</CardTitle>
-                <CardContent>
-                  <div className="flex items-center text-sm text-stone-300 pb-6">
-                    <span>Creating a future for our feathered friends.</span>
-                  </div>
-                </CardContent>
-              </div>
-              
-              <div className="mr-6">
-                <p className="mb-2 text-stone-300">Current User: {user?.username}</p>
-                <button className="w-32 py-1 rounded-md bg-red-700 hover:bg-red-800 text-white transition-colors duration-200" onClick={signOut}>Sign out</button>
-              </div>
-            </Card> */}
-
-            <div className="mr-6 absolute top-10 right-0 mt-3">
+            <div className="mr-6 absolute top-10 right-0 mt-3 md:block hidden">
               <p className="mb-2 text-stone-300">Current User: {user?.username}</p>
               <button className="w-32 py-1 rounded-md bg-red-700 hover:bg-red-800 text-white transition-colors duration-200" onClick={signOut}>Sign out</button>
             </div>
-            
-            <div className={`${inter.className} pt-40`}>  
+
+            <div className={`${inter.className} pt-40`}>
               {children}
+            </div>
+
+            <div className="-mt-10 gap-5 md:hidden bg-stone-100 w-100 pt-5 pl-4 text-stone-500">
+                <p className="mb-2">Current User: {user?.username}</p>
+                <button className="w-32 py-1 rounded-md bg-red-700 hover:bg-red-800 text-white transition-colors duration-200" onClick={signOut}>Sign out</button>
             </div>
             <Card key="emergency"
                   className="rounded-xl border text-card-foreground overflow-hidden border-none shadow-none bg-stone-100">
@@ -101,7 +83,7 @@ export default function RootLayout({
               <CardContent className="p-4">
                 If you're having an emergency with a bird rescue, call us.
               </CardContent>
-              <CardFooter className="bg-stone-50 p-4">
+              <CardFooter className="bg-stone-100 p-4">
                 <a href="tel:5152075008"
                   className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-9 px-4 py-2 w-full bg-red-600 hover:bg-red-300 transition-colors duration-200 ease-in-out text-white"
                 >

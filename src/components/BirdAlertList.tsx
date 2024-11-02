@@ -206,7 +206,7 @@ export default function BirdAlertList() {
                                                         className="text-lg font-semibold">{rescue.species}</CardTitle>
                                                 </div>
                                                 <Badge variant="secondary"
-                                                    className={`${getStatusColor(rescue.status)} text-white h-10`}>
+                                                    className={`${getStatusColor(rescue.status)} text-white h-10 pl-8 pr-8 pt-2 pb-2 text-sm`}>
                                                     {rescue.status}
                                                 </Badge>
                                             </div>
