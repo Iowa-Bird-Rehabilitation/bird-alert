@@ -65,6 +65,9 @@ export default function BestPractices() {
                     <span className='font-semibold'>In Route</span> - The bird alert has been picked up by a volunteer and they are now on their way to the scene.
                 </p>
                 <p className='text-stone-800 text-sm mb-2'>
+                    <span className='font-semibold'>On Scene</span> - The volunteer has arrived on the scene of the bird alert and is actively working to resolve the alert.
+                </p>
+                <p className='text-stone-800 text-sm mb-2'>
                     <span className='font-semibold'>Rescued</span> - The bird has been rescued, either released on site, or is now in transit to the IBR facility. 
                 </p>
                 <p className='text-stone-800 text-sm mb-2'>
