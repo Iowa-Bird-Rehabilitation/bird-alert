@@ -1,12 +1,12 @@
-import {ArrowLeftIcon, BadgeInfo, CircleUser, Clock, HomeIcon, MapPinIcon, Notebook, WineOff, XIcon} from 'lucide-react'
-import {Card, CardContent, CardHeader, CardTitle} from '@/components/ui/card'
+import {ArrowLeftIcon, BadgeInfo, CircleUser, Clock, HomeIcon, MapPinIcon, Notebook} from 'lucide-react'
+import {Card, CardContent, CardHeader} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
-import {Label} from '@/components/ui/label'
 import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
-import Airtable, { base } from 'airtable'
+import Airtable from 'airtable'
 import Link from "next/link";
-import { formatDate, formatTime } from '@/lib/utils'
+import { formatDate, formatTime, getRTLevelColor, getStatusColor, renderSecondVolunteerElements } from '@/lib/utils'
+import AcceptForm from './AcceptForm'
 
 export default function RescueDetails({id}: { id: string }) {
     //state variables
@@ -15,7 +15,7 @@ export default function RescueDetails({id}: { id: string }) {
     const [error, setError] = useState<string | null>(null)
     const [showAcceptForm, setShowAcceptForm] = useState(false)
     const [localRescuerName, setLocalRescuerName] = useState<string>("")
-    const [volunteers, setVolunteers] = useState<any[]>([])
+    const [volunteers, setVolunteers] = useState<Volunteer[]>([])
     const [userNoteValue, setUserNoteValue] = useState<string>()
 
     //connecting to airtable
@@ -58,41 +58,6 @@ export default function RescueDetails({id}: { id: string }) {
             setUserNoteValue(b.userNotes)
         });
     }, []);
-
-
-    // colors for the statuses that correspond to the airtable colors in the 'VolunteerStatus' column
-    const getStatusColor = (status: RescueStatus) => {
-        switch (status) {
-            case 'Pending':
-                return 'bg-rose-600 hover:bg-rose-800'
-            case 'In Route':
-                return 'bg-amber-600 hover:bg-amber-800'
-            case 'Rescued':
-                return 'bg-violet-700 hover:bg-violet-800'
-            case 'Delivered':
-                return 'bg-teal-700 hover:bg-teal-800'
-            case 'Incomplete':
-                return 'bg-red-600 hover:bg-red-700'
-            case 'Released On Site':
-                return 'bg-pink-500 hover:bg-pink-600'
-            default:
-                return 'bg-gray-800 hover:bg-gray-900'
-        }
-    }
-
-    const getRTLevelColor = (level: RTLevel) => {
-        if (level.toLowerCase().includes("green")) {
-            return 'bg-green-600 hover:bg-green-800'
-        }else if (level.toLowerCase().includes("yellow")) {
-            return 'bg-yellow-600 hover:bg-yellow-800'
-        }else if (level.toLowerCase().includes("red")) {
-            return 'bg-red-600 hover:bg-red-800'
-        }else if (level.toLowerCase().includes("purple")) {
-            return 'bg-purple-600 hover:bg-purple-800'
-        }else {
-            return 'bg-gray-500 hover:bg-gray-800'
-        }
-    }
 
     //Change status of VolunteerStatus
     const handleVolunteerStatusChange = async (newStatus: RescueStatus) => {
@@ -173,25 +138,42 @@ export default function RescueDetails({id}: { id: string }) {
         setShowAcceptForm(true)
     }
 
-    function handleAcceptSecondVolunteerClick() {
-        setShowAcceptForm(true)
-    }
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if ((await fetchBirdRescue()).currentVolunteer) {
-            window.alert("Another user has already claimed this Bird Alert, please refresh your page to see the updated data.")
-            return
-        }
-
-        //// This runs the secondary submit function if it is the second volunteer being chosen
         if (birdRescue?.twoPersonRescue && birdRescue.currentVolunteer) {
-            handleSubmitSecondVolunteer(e)
+
+            if ((await fetchBirdRescue()).secondVolunteer) {
+                window.alert("Both spots have been claimed by other volunteers. Please refresh your page to see the updated data.")
+                return
+            }
+           
+            const fields = {SecondVolunteer: localRescuerName, VolunteerStatus: `In Route`}
+            try {
+                await airtableBase('Bird Alerts').update([
+                    {
+                        id: birdRescue!.id,
+                        fields: fields
+                    }
+                ])
+                setShowAcceptForm(false)
+                const updatedBird = {...birdRescue} as BirdAlert
+                updatedBird.secondVolunteer = localRescuerName
+                updatedBird.status = 'In Route'
+                setBirdRescue(updatedBird)
+            } catch {
+                throw error
+            }
+
         }else {
+
+            if ((await fetchBirdRescue()).currentVolunteer) {
+                window.alert("Another user has already claimed this Bird Alert, please refresh your page to see the updated data.")
+                return
+            }
             const fields = {CurrentVolunteer: localRescuerName, VolunteerStatus: `${!birdRescue?.currentVolunteer && !birdRescue?.twoPersonRescue ? 'In Route' : "Pending"}`}
             try {
-                const updatedRecords = await airtableBase('Bird Alerts').update([
+                await airtableBase('Bird Alerts').update([
                     {
                         id: birdRescue!.id,
                         fields: fields
@@ -210,32 +192,6 @@ export default function RescueDetails({id}: { id: string }) {
         }
     }
 
-    const handleSubmitSecondVolunteer = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        if ((await fetchBirdRescue()).currentVolunteer) {
-            window.alert("Both spots have been claimed by other volunteers. Please refresh your page to see the updated data.")
-            return
-        }
-
-        const fields = {SecondVolunteer: localRescuerName, VolunteerStatus: `In Route`}
-        try {
-            const updatedRecords = await airtableBase('Bird Alerts').update([
-                {
-                    id: birdRescue!.id,
-                    fields: fields
-                }
-            ])
-            setShowAcceptForm(false)
-            const updatedBird = {...birdRescue} as BirdAlert
-            updatedBird.secondVolunteer = localRescuerName
-            updatedBird.status = 'In Route'
-            setBirdRescue(updatedBird)
-        } catch {
-            throw error
-        }
-    }
-
     // get volunteers based off of the PossibleVolunteers column
     const fetchVolunteers = async () => {
         setIsLoading(true)
@@ -246,8 +202,7 @@ export default function RescueDetails({id}: { id: string }) {
                 fields: ["Name", "_id"]
             })
 
-            /// Airtable has a weird type of fieldSet that causes issues with all of the typing and I cant seem to figure it out, so I just made this one type of any
-            const volunteersData : any[] = []
+            const volunteersData : Volunteer[] = []
             await records.eachPage((records, processNextPage) => {
                 records.forEach(({fields, id}) => {
                     volunteersData.push({
@@ -257,64 +212,12 @@ export default function RescueDetails({id}: { id: string }) {
                 })
                 processNextPage()
             })
-
             setVolunteers(volunteersData)
         } catch (error) {
             console.error('Error fetching bird rescues:', error)
             setError('Failed to fetch bird rescues. Please try again later.')
         }
         setIsLoading(false)
-    }
-
-
-    function acceptForm() {
-        return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-                 onClick={() => setShowAcceptForm(false)}>
-                <Card className="w-full max-w-md " onClick={(e) => e.stopPropagation()}>
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <CardTitle className="text-lg md:text-xl font-semibold text-stone-800">Accept
-                                Rescue</CardTitle>
-                            <Button variant="ghost" size="icon" onClick={() => setShowAcceptForm(false)}>
-                                <XIcon className="h-4 w-4"/>
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label className="block mb-2 text-sm font-medium text-gray-900"> Your Name</Label>
-                                <select required onChange={(e) => setLocalRescuerName(e.target.value) } name='name'
-                                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                    <option value={""}>-- Please Pick Your Name</option>
-                                    {populateNameOptions()}
-                                </select>
-                            </div>
-                            <Button disabled={!localRescuerName} type="submit"
-                                    className="w-full bg-lime-600 hover:bg-lime-700 text-white">
-                                Accept Rescue
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
-
-    // this is what actually populates the list
-    function populateNameOptions() {
-        
-        const volunteerOptions = volunteers.filter((vol: {id: string, name: string}) => birdRescue!.possibleVolunteers.includes(vol.id) && vol.name !== birdRescue?.currentVolunteer)
-        const volunteerOptionElements = volunteerOptions.map((vol: { id: string, name: string }, index: number) => {
-            return (
-                <option key={index} value={vol.name}>
-                    {vol.name}
-                </option>
-            )
-        })
-
-        return volunteerOptionElements
     }
 
     const updateRescueInAirtable = async (id: string, fields: any) => {
@@ -330,16 +233,6 @@ export default function RescueDetails({id}: { id: string }) {
         } catch (error) {
             console.error('Error updating Airtable:', error)
             throw error
-        }
-    }
-
-    function renderSecondVolunteerElements(rescue : BirdAlert) {
-        if (!rescue.twoPersonRescue) return
-
-        if (rescue.secondVolunteer) {
-            return `, ${rescue.secondVolunteer}`
-        }else if (!rescue.secondVolunteer && rescue.currentVolunteer) {
-            return `, SECOND VOLUNTEER NEEDED`
         }
     }
 
@@ -484,7 +377,14 @@ export default function RescueDetails({id}: { id: string }) {
                         <div className="space-y-4">
                             {
                                 showAcceptForm &&
-                                acceptForm()
+                                <AcceptForm 
+                                    volunteers={volunteers}
+                                    birdRescue={birdRescue}
+                                    setShowAcceptForm={setShowAcceptForm}
+                                    handleSubmit={handleSubmit}
+                                    setLocalRescuerName={setLocalRescuerName}
+                                    localRescuerName={localRescuerName}
+                                />
                             }
                             {birdRescue.status === 'Pending' && !birdRescue.currentVolunteer && (
                                 <Button
@@ -496,15 +396,22 @@ export default function RescueDetails({id}: { id: string }) {
                             {birdRescue.status === 'Pending' && birdRescue.currentVolunteer && !birdRescue.secondVolunteer && birdRescue.twoPersonRescue && (
                                 <Button
                                     className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors duration-200"
-                                    onClick={handleAcceptSecondVolunteerClick}>
+                                    onClick={handleAcceptClick}>
                                     Accept Rescue (Second Volunteer)
                                 </Button>
                             )}
                             {birdRescue.status === 'In Route' &&  (
                                 <Button
+                                    className="w-full bg-pink-500 hover:bg-pink-600 text-white transition-colors duration-200"
+                                    onClick={() => handleVolunteerStatusChange('On Scene')}>
+                                    Mark as On Scene
+                                </Button>
+                            )}
+                            {birdRescue.status === 'On Scene' &&  (
+                                <Button
                                     className="w-full bg-red-700 hover:bg-red-800 text-white transition-colors duration-200"
                                     onClick={() => handleVolunteerStatusChange('Rescued')}>
-                                    Mark as rescued
+                                    Mark as Rescued
                                 </Button>
                             )}
                             {birdRescue.status === 'Rescued' && (
