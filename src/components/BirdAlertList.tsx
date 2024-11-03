@@ -102,35 +102,34 @@ export default function BirdAlertList() {
         <>
             <Card className="overflow-hidden border-none shadow-none bg-stone-100">
                 <CardHeader className="">
-                    <CardTitle className="text-lg font-semibold text-stone-800 pt-4">
-                        Available Rescues
-                        <Popover open={isFilterOpen} onOpenChange={setIsFilterIsFilterOpen}>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={isFilterOpen}
-                                    className=" mt-2 w-full justify-between"
-                                >
-                                    {value
-                                        ? Array.from(value).join(',')
-                                        : "Select framework..."}
-                                    <ChevronsUpDown className="ml-2 h-4 w-8 shrink-0 opacity-50"/>
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="sm:w-[500px] p-0">
-                                <Command>
-                                    <CommandInput placeholder="Select statuses..."/>
-                                    <CommandList>
-                                        <CommandEmpty>No statuses found.</CommandEmpty>
-                                        <CommandGroup>
-                                            {allStatuses.map((status) => {
-                                                if (status === "Delivered" || status === "Released On Site" || status === "Incomplete") {
-                                                    return
-                                                }
-                                                return (
-                                                    <CommandItem
-                                                    key={status}
+                    <CardTitle className="text-lg font-semibold text-stone-800 pt-4"> Available Rescues </CardTitle>
+                    
+                    <Popover open={isFilterOpen} onOpenChange={setIsFilterIsFilterOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                                variant="outline"
+                                role="combobox"
+                                aria-expanded={isFilterOpen}
+                                className=" mt-2 w-full justify-between"
+                            >
+                                {value
+                                    ? Array.from(value).join(',')
+                                    : "Select framework..."}
+                                <ChevronsUpDown className="ml-2 h-4 w-8 shrink-0 opacity-50"/>
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="sm:w-[500px] p-0">
+                            <Command>
+                                <CommandInput placeholder="Select statuses..."/>
+                                <CommandList>
+                                    <CommandEmpty>No statuses found.</CommandEmpty>
+                                    <CommandGroup>
+                                        {allStatuses.map((status) => {
+                                            if (status === "Delivered" || status === "Released On Site" || status === "Incomplete") {
+                                                return
+                                            }
+                                            return (
+                                                <CommandItem key={status}
                                                     onSelect={() => {
                                                         const newValue = new Set(value)
                                                         if (newValue.has(status)) {
@@ -140,25 +139,20 @@ export default function BirdAlertList() {
                                                         }
                                                         setValue(newValue)
                                                         }}
-                                                    >
-                                                        <Checkbox
-                                                            checked={value.has(status)}
-                                                            className={cn(
-                                                                "mr-2 h-4 w-4"
-                                                            )}/>
-                                                        {status}
-                                                    </CommandItem>
-                                                )
-                                            })}
-                                        </CommandGroup>
-                                        <CommandItem>
-                                            <Button onClick={() => setIsFilterIsFilterOpen(false)}>Done</Button>
-                                        </CommandItem>
-                                    </CommandList>
-                                </Command>
-                            </PopoverContent>
-                        </Popover>
-                    </CardTitle>
+                                                >
+                                                    <Checkbox checked={value.has(status)} className={cn("mr-2 h-4 w-4")}/>
+                                                    {status}
+                                                </CommandItem>
+                                            )
+                                        })}
+                                    </CommandGroup>
+                                    <CommandItem>
+                                        <Button onClick={() => setIsFilterIsFilterOpen(false)}>Done</Button>
+                                    </CommandItem>
+                                </CommandList>
+                            </Command>
+                        </PopoverContent>
+                    </Popover>
                 </CardHeader>
 
                 <Card className='overflow-hidden border-none shadow-none bg-stone-100'>
@@ -235,7 +229,6 @@ export default function BirdAlertList() {
                                         </CardFooter>
                                     </Card>
                                 )
-                                
                             })}
                         </div>
                     )}
