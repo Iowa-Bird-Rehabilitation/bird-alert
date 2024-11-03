@@ -9,9 +9,10 @@ import Airtable from 'airtable'
 import {Checkbox} from "@/components/ui/checkbox";
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command'
-import {cn, formatDate, formatTime, getStatusColor, renderSecondVolunteerElements} from "@/lib/utils";
+import {cn, formatDate, formatTime} from "@/lib/utils";
 import Link from "next/link";
 import BestPractices from './BestPractices'
+import { getStatusColor, renderSecondVolunteerElements } from '@/utils/utils'
 
 export default function BirdAlertList() {
     // creates the variables needed to set up the bird alert list
@@ -93,6 +94,28 @@ export default function BirdAlertList() {
         }
         setIsLoading(false)
     }
+
+    // const getStatusColor = (status: RescueStatus) => {
+    //     console.log(status)
+    //   switch (status) {
+    //       case 'Pending':
+    //           return 'bg-rose-600 hover:bg-rose-800'
+    //       case 'In Route':
+    //           return 'bg-amber-600 hover:bg-amber-800'
+    //       case 'On Scene':
+    //           return 'bg-pink-500 hover:bg-pink-600'
+    //       case 'Rescued':
+    //           return 'bg-violet-700 hover:bg-violet-800'
+    //       case 'Delivered':
+    //           return 'bg-teal-700 hover:bg-teal-800'
+    //       case 'Incomplete':
+    //           return 'bg-red-600 hover:bg-red-700'
+    //       case 'Released On Site':
+    //           return 'bg-pink-500 hover:bg-pink-600'
+    //       default:
+    //           return 'bg-gray-800 hover:bg-gray-900'
+    //   }
+    // }
     
     useEffect(() => {
         fetchBirdRescues()
@@ -191,6 +214,7 @@ export default function BirdAlertList() {
                                                 <Badge variant="secondary"
                                                     className={`${getStatusColor(rescue.status)} text-white h-10 pl-8 pr-8 pt-2 pb-2 text-sm`}>
                                                     {rescue.status}
+                                                   
                                                 </Badge>
                                             </div>
                                         </CardHeader>
