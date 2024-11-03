@@ -1,6 +1,6 @@
 'use client'
 
-import {ArrowRightIcon, ChevronsUpDown, Clock, HomeIcon, MapPinIcon, UserCircle} from 'lucide-react'
+import { ChevronsUpDown, Clock, HomeIcon, MapPinIcon, UserCircle} from 'lucide-react'
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from '@/components/ui/card'
 import {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
@@ -9,14 +9,15 @@ import Airtable from 'airtable'
 import {Checkbox} from "@/components/ui/checkbox";
 import {Popover, PopoverContent, PopoverTrigger} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from '@/components/ui/command'
-import {cn, formatDate, formatTime} from "@/lib/utils";
+import {cn, formatDate, formatTime, getStatusColor, renderSecondVolunteerElements} from "@/lib/utils";
 import Link from "next/link";
+import BestPractices from './BestPractices'
 
 export default function BirdAlertList() {
     // creates the variables needed to set up the bird alert list
     const [birdRescues, setBirdRescues] = useState<BirdAlert[]>([])
-    const allStatuses = ['Pending', 'In Route', 'Rescued', 'Delivered', 'Incomplete', 'Released On Site'] as RescueStatus[];
-    const [value, setValue] = useState(new Set<RescueStatus>(['Pending', 'In Route', 'Rescued']))
+    const allStatuses = ['Pending', 'In Route','On Scene', 'Rescued', 'Delivered', 'Incomplete', 'Released On Site'] as RescueStatus[];
+    const [value, setValue] = useState(new Set<RescueStatus>(['Pending', 'In Route','On Scene', 'Rescued']))
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -26,20 +27,6 @@ export default function BirdAlertList() {
     // connection to airtable and the Bird Alert table.
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
     const airtableBase = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
-
-    // colors for status
-    const getStatusColor = (status: RescueStatus) => {
-        switch (status) {
-            case 'Pending':
-                return 'bg-rose-600 hover:bg-rose-800'
-            case 'In Route':
-                return 'bg-amber-600 hover:bg-amber-800'
-            case 'Rescued':
-                return 'bg-violet-700 hover:bg-violet-800'
-            case 'Delivered':
-                return 'bg-teal-700'
-        }
-    }
 
     // this function collects the records from airtable and converts them to type 'Bird'
     const fetchBirdRescues = async () => {
@@ -106,17 +93,7 @@ export default function BirdAlertList() {
         }
         setIsLoading(false)
     }
-
-    function renderSecondVolunteerElements(rescue : BirdAlert) {
-        if (!rescue.twoPersonRescue) return
-
-        if (rescue.secondVolunteer) {
-            return `, ${rescue.secondVolunteer}`
-        }else if (!rescue.secondVolunteer && rescue.currentVolunteer) {
-            return `, SECOND VOLUNTEER NEEDED`
-        }
-    }
-
+    
     useEffect(() => {
         fetchBirdRescues()
     }, [])
@@ -190,94 +167,7 @@ export default function BirdAlertList() {
                     </CardHeader>
                 </Card>
                 {
-                    showBestPractices &&
-                    
-                    <Card className="mr-4 ml-4 p-4">
-                    <div>
-                        <h2 className='text-center mb-4 font-bold'>Bird Alert Best Practices:</h2>
-                    </div>
-                    <div className='mb-3'>
-                        <h2 className='font-bold'>Only change your own Bird Alert:</h2>
-                        <p className='text-stone-800 text-sm'>
-                            Once you pick up an alert, 
-                            you should be the only person making changes on that alert (Unless it is an alert that requires two people, in this case you should coordinate with the other
-                            volunteer to ensure that the correct changes are made).
-                        </p>
-                    </div>
-
-                    <div className='mb-3'>
-                        <h2 className='font-bold'>Keep your Bird Alert up to date:</h2>
-                        <p className='text-stone-800 text-sm'>
-                            If you are actively working on a Bird Alert, it is important to update the alert accordingly. For example if you have rescued the bird and 
-                            are now transporting it to IBR, make sure to click the "Mark As Rescued" button in the alert. Keeping the alert updated helps IBR keep track of 
-                            the current status of all active alerts.
-                        </p>
-                    </div>
-
-                    <div className='mb-3'>
-                        <h2 className='font-bold'>Read your Bird Alert closely:</h2>
-                        <p className='text-stone-800 text-sm'>
-                           All of the applicable information about the rescue/transport will be in the details of the Bird Alert. Make sure to read carefully so you do not miss any 
-                           important details, including the notes given by IBR about the alert.
-                        </p>
-                    </div>
-
-                    <div className='mb-5'>
-                        <h2 className='font-bold'>Using the volunteer notes section:</h2>
-                        <p className='text-stone-800 text-sm mb-2'>
-                           The volunteer notes section gives you a way to communicate with other volunteers. However this should not be used as a messaging board.
-                           These notes allow volunteers to provide important updates about the alert, that may be valuable to IBR or other volunteers. 
-                        </p>
-
-                        <p className='text-stone-800 text-sm mb-2'>
-                            For example,
-                           if you are qualified to pick up an alert, but cannot do so for a period of time, you can add to the notes section stating as such. If another volunteer can immediately 
-                           pick up the Bird Alert, they can add another note stating that they have done so and then pick up the alert.
-                        </p>
-
-                        <p className='text-stone-800 text-sm'>
-                            This allows other volunteers that may be involved to be updated on the current status of the alert.
-                        </p>
-                    </div>
-
-                    <div>
-                        <h2 className='text-center mb-4 font-bold'>FAQ's:</h2>
-                    </div>
-
-                    <div className='mb-3'>
-                        <h2 className='font-bold'>What do each of the status badges mean?</h2>
-                        <p className='text-stone-800 text-sm mb-2'>
-                           <span className='font-semibold'>Pending</span> - The bird alert has not been picked up yet, and is waiting for a qualified volunteer to do so.
-                        </p>
-                        <p className='text-stone-800 text-sm mb-2'>
-                            <span className='font-semibold'>In Route</span> - The bird alert has been picked up by a volunteer and they are now on their way to the scene.
-                        </p>
-                        <p className='text-stone-800 text-sm mb-2'>
-                            <span className='font-semibold'>Rescued</span> - The bird has been rescued, either released on site, or is now in transit to the IBR facility. 
-                        </p>
-                        <p className='text-stone-800 text-sm mb-2'>
-                            <span className='font-semibold'>Delivered</span> - The bird has been dropped off at the IBR facility.
-                        </p>
-                    </div>
-
-                    <div className='mb-3'>
-                        <h2 className='font-bold'>Why is my name not available to choose?</h2>
-                        <p className='text-stone-800 text-sm'>
-                           The list of names available to choose for each bird alert is automatically determined when the bird alert is created by IBR.
-                           This is based off of current skills, training, and location. If you believe that the system has incorrectly left your 
-                           name off of an alert, please speak to IBR.
-                        </p>
-                    </div>
-                    
-                    <div className='mb-3'>
-                        <h2 className='font-bold'>What should I do if there is an emergency?:</h2>
-                        <p className='text-stone-800 text-sm'>
-                           At the bottom of the page there is a call button that will call IBR directly. This should only be used in an emergency where
-                           reaching IBR immediately is critical.
-                        </p>
-                    </div>
-                    
-                </Card>
+                    showBestPractices && <BestPractices></BestPractices>
                 }
                 
                 <CardContent className="p-4">
