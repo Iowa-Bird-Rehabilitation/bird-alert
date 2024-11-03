@@ -353,9 +353,9 @@ export default function RescueDetails({id}: { id: string }) {
             </div>
         ) :
         (
-            <div className="p-4">
+            <div className="p-4 pb-14">
                 <div className="flex items-center">
-                    <Link className="mr-2 mb-3" href={"/"}>
+                    <Link className="mr-2 mb-6 mt-3" href={"/"}>
                         <div><ArrowLeftIcon className="inline-block h-4 w-4 mb-1"/> Back</div>
                     </Link>
                 </div>
