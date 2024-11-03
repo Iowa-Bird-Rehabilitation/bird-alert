@@ -5,8 +5,9 @@ import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
 import Airtable from 'airtable'
 import Link from "next/link";
-import { formatDate, formatTime, getRTLevelColor, getStatusColor, renderSecondVolunteerElements } from '@/lib/utils'
+import { formatDate, formatTime } from '@/lib/utils'
 import AcceptForm from './AcceptForm'
+import { getRTLevelColor, getStatusColor, renderSecondVolunteerElements } from '@/utils/utils'
 
 export default function RescueDetails({id}: { id: string }) {
     //state variables
