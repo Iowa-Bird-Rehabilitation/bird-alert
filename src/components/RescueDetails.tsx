@@ -401,16 +401,23 @@ export default function RescueDetails({id}: { id: string }) {
 
                             <div className="flex items-center bg-stone-50 p-3 rounded-md flex-row">
                                 <PhoneIcon className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/> 
-                                <h2 className='mr-2'>Bird alert caller phone number: {birdRescue.callerNumber}</h2>                                
+                                <h2 className='mr-2'>Bird alert caller phone number: {birdRescue.callerNumber ? birdRescue.callerNumber : "No number available"}</h2>                                
                             </div>
-                            <a href={`tel:${birdRescue?.callerNumber.replace(/\D/g,'')}`}
-                                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-9 px-4 py-2 w-full bg-lime-600 hover:bg-lime-300 transition-colors duration-200 ease-in-out text-white"
-                                >
-                                <PhoneIcon className="mr-2"/> Call bird alert caller
-                            </a>
 
+                            {
+                                birdRescue.callerNumber
+
+                                    ?
+                                        <a href={`tel:${birdRescue?.callerNumber.replace(/\D/g,'')}`}
+                                            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-9 px-4 py-2 w-full bg-lime-600 hover:bg-lime-300 transition-colors duration-200 ease-in-out text-white"
+                                            >
+                                            <PhoneIcon className="mr-2"/> Call bird alert caller
+                                        </a>
+
+                                    :
+                                        <></>
+                            }
                             
-
                             <div className="flex flex-col content-center items-start bg-stone-50 p-3 rounded-md">
                                 <div className='flex items-center mb-4'>
                                     <BadgeInfo className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
@@ -431,8 +438,7 @@ export default function RescueDetails({id}: { id: string }) {
                                 <textarea onChange={(e) => setUserNoteValue(e.target.value)} className='border-2 w-full h-40 p-2 rounded-md resize-none'>{birdRescue.userNotes}</textarea>
                                 <button onClick={() => updateRescueInAirtable(birdRescue.id, {UserNotes: userNoteValue})} className="w-36 bg-blue-600 text-sm hover:bg-blue-700 text-white mt-3 h-8 transition-colors duration-200 rounded-md "> Save Note</button>
                             </div>
-                            
-                                
+                             
                         </div>
                         <div className="space-y-4">
                             {
