@@ -1,4 +1,4 @@
-import {ArrowLeftIcon, BadgeInfo, CircleUser, Clock, HomeIcon, MapPinIcon, Notebook} from 'lucide-react'
+import {ArrowLeftIcon, BadgeInfo, CircleUser, Clock, HomeIcon, MapPinIcon, Notebook, PhoneIcon} from 'lucide-react'
 import {Card, CardContent, CardHeader} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import React, {useEffect, useState} from 'react'
@@ -38,8 +38,9 @@ export default function RescueDetails({id}: { id: string }) {
             birdStatus: record.get('BirdStatus') as BirdStatus,
             notes: record.get("Notes") as string,
             userNotes: record.get("UserNotes") as string,
+            callerNumber: record.get("CallerContactNumber") as string,
             rtLevel: record.get('RTLevel') as RTLevel,
-            skills: record.get('TechnicalSkills') as Skills[],
+            skills: record.get('TechnicalSkills') as string[],
             possibleVolunteers: record.get("PossibleVolunteers") as string[] ?? [],
             currentVolunteer: record.get("CurrentVolunteer") as string,
             secondVolunteer: record.get("SecondVolunteer") as string,
@@ -238,7 +239,6 @@ export default function RescueDetails({id}: { id: string }) {
     }
 
     const getRTLevelColor = (level: RTLevel) => {
-        console.log(level)
       if (level.toLowerCase().includes("green")) {
           return 'bg-green-600 hover:bg-green-800'
       }else if (level.toLowerCase().includes("yellow")) {
@@ -302,12 +302,21 @@ export default function RescueDetails({id}: { id: string }) {
                         </div>
                     </CardHeader>
                     <CardContent className="px-4 py-4 space-y-4">
-                        <img
-                            src={birdRescue.photo['url']}
-                            width={birdRescue.photo['width']}
-                            height={birdRescue.photo['height']}
-                            alt={birdRescue.species}
-                            className="rounded-md shadow-md w-full md:w-2/4 float-left md:mr-8 md:mb-8"/>
+                        {
+                            birdRescue.photo['url']
+                                ?
+                                    <img
+                                    src={birdRescue.photo['url']}
+                                    width={birdRescue.photo['width']}
+                                    height={birdRescue.photo['height']}
+                                    alt={birdRescue.species}
+                                    className="rounded-md shadow-md w-full md:w-2/4 float-left md:mr-8 md:mb-8"/>
+                                :   
+                                    <>
+                                        <img src='../images/birds-outline.jpg' alt='outline of a generic bird'/> 
+                                    </>
+                        }
+                        
                         <Badge variant="secondary" className={`${getRTLevelColor(birdRescue.rtLevel)} text-white mr-2`}>
                             {birdRescue.rtLevel}
                         </Badge>
@@ -324,7 +333,9 @@ export default function RescueDetails({id}: { id: string }) {
                         <div className="">
                             <span className="font-bold text-black">Technical Skills:</span>
                             <ul className="">
-                                {birdRescue.skills?.map((skill, index) => <li key={index}>{skill}</li>)}
+                                <Badge variant="secondary" className={`bg-gray-800 hover:bg-gray-900 text-white mr-2`}>
+                                    {birdRescue.skills?.map((skill, index) => <li key={index}>{skill}</li>)}
+                                </Badge>
                             </ul>
                         </div>
 
@@ -387,6 +398,18 @@ export default function RescueDetails({id}: { id: string }) {
                                 <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
                                 <h2 className='mr-2'>Bird-Alert Notes: {birdRescue.notes}</h2>
                             </div>
+
+                            <div className="flex items-center bg-stone-50 p-3 rounded-md flex-row">
+                                <PhoneIcon className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/> 
+                                <h2 className='mr-2'>Bird alert caller phone number: {birdRescue.callerNumber}</h2>                                
+                            </div>
+                            <a href={`tel:${birdRescue?.callerNumber.replace(/\D/g,'')}`}
+                                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 border border-input shadow-sm hover:text-accent-foreground h-9 px-4 py-2 w-full bg-lime-600 hover:bg-lime-300 transition-colors duration-200 ease-in-out text-white"
+                                >
+                                <PhoneIcon className="mr-2"/> Call bird alert caller
+                            </a>
+
+                            
 
                             <div className="flex flex-col content-center items-start bg-stone-50 p-3 rounded-md">
                                 <div className='flex items-center mb-4'>
