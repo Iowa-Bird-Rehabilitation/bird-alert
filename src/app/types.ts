@@ -1,6 +1,5 @@
 type RescueStatus = 'Pending' | 'In Route' |'On Scene' | 'Rescued' | 'Delivered' | 'Incomplete' | 'Released On Site'
 type RTLevel = 'Green: songbirds & babies' | 'Yellow: geese, ducks and swans' | 'Red: herons, bats' | 'Purple: raptors';
-type Skills = 'Pickup and Transport' | 'Water Rescue' | '2 Person job' | 'Heights: Tree service needed/Ladder' | 'Triage Trained';
 type BirdStatus = "" | 'Rescued - Released' | 'No Show' | 'Died' | 'Assessed' 
 
 interface BirdAlert {
@@ -12,8 +11,9 @@ interface BirdAlert {
     birdStatus: BirdStatus,
     notes: string,
     userNotes: string,
+    callerNumber: string,
     rtLevel: RTLevel,
-    skills: Skills[],
+    skills: string[],
     possibleVolunteers: string[];
     currentVolunteer: string,
     secondVolunteer: string,
