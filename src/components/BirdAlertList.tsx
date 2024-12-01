@@ -49,7 +49,6 @@ export default function BirdAlertList() {
                     "PossibleVolunteers",
                     "CurrentVolunteer",
                     "SecondVolunteer",
-                    "TwoPersonRescue",
                     "BirdPhoto",
                     "Created"
                 ]
@@ -74,7 +73,6 @@ export default function BirdAlertList() {
                         possibleVolunteers: fields.PossibleVolunteers as string[] ?? [],
                         currentVolunteer: fields.CurrentVolunteer as string,
                         secondVolunteer: fields.SecondVolunteer as string,
-                        twoPersonRescue: fields.TwoPersonRescue as Boolean,
                         photo: fields.BirdPhoto ? ((fields.BirdPhoto as object[])[0] as {
                             url: string,
                             width: number,
@@ -203,6 +201,9 @@ export default function BirdAlertList() {
                                 return allStatuses.indexOf(a.status) < allStatuses.indexOf(b.status) ? -1 : 1
                             }).map(rescue => {
                                 if (rescue.status === "Delivered" || rescue.status === "Incomplete" || rescue.status === "Released On Site") {return}
+
+                                const regex = new RegExp( rescue.skills.join( "|" ), "i");
+                                const twoPersonRescue = regex.test("two person job")
                                 return (
                                     <Card key={rescue.id} className="overflow-hidden">
                                         <CardHeader className="p-4">
@@ -232,8 +233,8 @@ export default function BirdAlertList() {
                                                     <UserCircle className="mr-2 h-4 w-4 flex-shrink-0"/>
                                                     <span>Current Volunteer: 
                                                         <span className='bold-text'>
-                                                            {rescue.currentVolunteer ? " " + rescue.currentVolunteer : ` AVAILABLE${rescue.twoPersonRescue && !rescue.currentVolunteer ? "(2)" : ""}`} 
-                                                            {renderSecondVolunteerElements(rescue)}                                                            
+                                                            {rescue.currentVolunteer ? " " + rescue.currentVolunteer : ` AVAILABLE${twoPersonRescue && !rescue.currentVolunteer ? "(2)" : ""}`} 
+                                                            {renderSecondVolunteerElements(rescue, twoPersonRescue)}                                                            
                                                         </span> 
                                                     </span>
                                                 </div>

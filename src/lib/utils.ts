@@ -13,8 +13,8 @@ export function formatTime(time: string) {
   return new Date(time).toLocaleTimeString('en-us', {hour:"numeric", minute:"2-digit"})
 }
 
-export function renderSecondVolunteerElements(rescue : BirdAlert) {
-  if (!rescue.twoPersonRescue) return
+export function renderSecondVolunteerElements(rescue : BirdAlert, twoPersonRescue: Boolean) {
+  if (!twoPersonRescue) return
 
   if (rescue.secondVolunteer) {
       return `, ${rescue.secondVolunteer}`
