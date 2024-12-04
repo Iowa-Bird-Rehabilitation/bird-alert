@@ -398,7 +398,7 @@ export default function RescueDetails({id}: { id: string }) {
 
                             <div className="flex items-center bg-stone-50 p-3 rounded-md">
                                 <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
-                                <h2 className='mr-2'>Bird-Alert Notes: {birdRescue.notes}</h2>
+                                <h2 className='mr-2 '>Bird-Alert Notes: <span className='bold-text'>{birdRescue.notes}</span></h2>
                             </div>
 
                             <div className="flex items-center bg-stone-50 p-3 rounded-md flex-row">
@@ -420,17 +420,7 @@ export default function RescueDetails({id}: { id: string }) {
                                         <></>
                             }
                             
-                            <div className="flex flex-col content-center items-start bg-stone-50 p-3 rounded-md">
-                                <div className='flex items-center mb-4'>
-                                    <BadgeInfo className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
-                                    <h2 className='mr-2'><span className='font-bold'>Additional Statuses: </span>If applicable please add in the notes below and contact IBR</h2>
-                                </div>
-                                
-                                <p className='ml-7'><span className='font-bold'>Rescued - Released:</span> Bird released on site, no further help needed.</p>
-                                <p className='ml-7'><span className='font-bold'>No Show:</span> Bird was not there or no longer in area.</p>
-                                <p className='ml-7'><span className='font-bold'>Assessed:</span> Situation assessed, further help needed at a later time.</p>
-                                <p className='ml-7'><span className='font-bold'>Died:</span> The Bird has died on scene.</p>
-                            </div>
+                            
 
                             <div className="flex flex-col items-start bg-stone-50 p-3 rounded-md ">
                                 <div className="flex text-align-left items-center bg-stone-50 pb-4 pt-1 rounded-md">
@@ -442,7 +432,7 @@ export default function RescueDetails({id}: { id: string }) {
                             </div>
                              
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-4" style={{marginBottom: "30px"}}>
                             {
                                 showAcceptForm &&
                                 <AcceptForm 
@@ -489,6 +479,17 @@ export default function RescueDetails({id}: { id: string }) {
                                     Mark as Delivered
                                 </Button>
                             )}
+                        </div>
+                        <div className="flex flex-col content-center items-start bg-stone-50 p-3 rounded-md">
+                            <div className='flex items-center mb-4'>
+                                <BadgeInfo className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
+                                <h2 className='mr-2'><span className='font-bold'>Additional Statuses: </span>If applicable please add in the notes below and contact IBR</h2>
+                            </div>
+                            
+                            <p className='ml-7'><span className='font-bold'>Rescued - Released:</span> Bird released on site, no further help needed.</p>
+                            <p className='ml-7'><span className='font-bold'>No Show:</span> Bird was not there or no longer in area.</p>
+                            <p className='ml-7'><span className='font-bold'>Assessed:</span> Situation assessed, further help needed at a later time.</p>
+                            <p className='ml-7'><span className='font-bold'>Died:</span> The Bird has died on scene.</p>
                         </div>
                     </CardContent>
                 </Card>
