@@ -335,9 +335,14 @@ export default function RescueDetails({id}: { id: string }) {
                         <div className="">
                             <span className="font-bold text-black">Technical Skills:</span>
                             <ul className="">
-                                <Badge variant="secondary" className={`bg-gray-800 hover:bg-gray-900 text-white mr-2`}>
-                                    {birdRescue.skills?.map((skill, index) => <li key={index}>{skill}</li>)}
-                                </Badge>
+                                {birdRescue.skills?.map((skill, index) =>{
+                                    return (
+                                        <Badge variant="secondary" className={`bg-gray-800 hover:bg-gray-900 text-white mr-2`}>
+                                            <li key={index}>{skill}</li>
+                                        </Badge>
+                                    )
+                                })}
+                                
                             </ul>
                         </div>
 
