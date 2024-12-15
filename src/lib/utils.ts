@@ -16,9 +16,9 @@ export function formatTime(time: string) {
 export function renderSecondVolunteerElements(rescue : BirdAlert, twoPersonRescue: Boolean) {
   if (!twoPersonRescue) return
 
-  if (rescue.secondVolunteer) {
+  if (rescue.secondVolunteer !== "None") {
       return `, ${rescue.secondVolunteer}`
-  }else if (!rescue.secondVolunteer && rescue.currentVolunteer) {
+  }else if (rescue.secondVolunteer === "None" && rescue.currentVolunteer !== "None") {
       return `, SECOND VOLUNTEER NEEDED`
   }
 }

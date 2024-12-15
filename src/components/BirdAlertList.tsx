@@ -233,7 +233,7 @@ export default function BirdAlertList() {
                                                     <UserCircle className="mr-2 h-4 w-4 flex-shrink-0"/>
                                                     <span>Current Volunteer: 
                                                         <span className='bold-text'>
-                                                            {rescue.currentVolunteer ? " " + rescue.currentVolunteer : ` AVAILABLE${twoPersonRescue && !rescue.currentVolunteer ? "(2)" : ""}`} 
+                                                            {rescue.currentVolunteer !== "None" ? " " + rescue.currentVolunteer : ` AVAILABLE${twoPersonRescue && rescue.currentVolunteer === "None" ? "(2)" : ""}`} 
                                                             {renderSecondVolunteerElements(rescue, twoPersonRescue)}                                                            
                                                         </span> 
                                                     </span>
