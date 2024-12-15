@@ -78,7 +78,7 @@ export default function RescueDetails({id}: { id: string }) {
                 }
 
                 // update airtable column
-                if (birdRescue.currentVolunteer) {
+                if (birdRescue.currentVolunteer !== "None") {
                     await updateRescueInAirtable(birdRescue.id, updatedFields)
                 }
 
@@ -145,9 +145,9 @@ export default function RescueDetails({id}: { id: string }) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (twoPersonRescue && birdRescue?.currentVolunteer) {
+        if (twoPersonRescue && birdRescue?.currentVolunteer !== "None") {
 
-            if ((await fetchBirdRescue()).secondVolunteer) {
+            if ((await fetchBirdRescue()).secondVolunteer !== "None") {
                 window.alert("Both spots have been claimed by other volunteers. Please refresh your page to see the updated data.")
                 return
             }
@@ -171,11 +171,11 @@ export default function RescueDetails({id}: { id: string }) {
 
         }else {
 
-            if ((await fetchBirdRescue()).currentVolunteer) {
+            if ((await fetchBirdRescue()).currentVolunteer !== "None") {
                 window.alert("Another user has already claimed this Bird Alert, please refresh your page to see the updated data.")
                 return
             }
-            const fields = {CurrentVolunteer: localRescuerName, VolunteerStatus: `${!birdRescue?.currentVolunteer && !twoPersonRescue ? 'In Route' : "Pending"}`}
+            const fields = {CurrentVolunteer: localRescuerName, VolunteerStatus: `${birdRescue?.currentVolunteer === "None" && !twoPersonRescue ? 'In Route' : "Pending"}`}
             try {
                 await airtableBase('Bird Alerts').update([
                     {
@@ -186,7 +186,7 @@ export default function RescueDetails({id}: { id: string }) {
                 setShowAcceptForm(false)
                 const updatedBird = {...birdRescue} as BirdAlert
                 updatedBird.currentVolunteer = localRescuerName
-                if (updatedBird.currentVolunteer && !twoPersonRescue) {
+                if (updatedBird.currentVolunteer !== "None" && !twoPersonRescue) {
                     updatedBird.status = 'In Route'
                 }
                 setBirdRescue(updatedBird)
@@ -373,7 +373,7 @@ export default function RescueDetails({id}: { id: string }) {
                                 <CircleUser className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
                                 <span>Current Volunteer:  
                                     <span className='bold-text'>
-                                        {birdRescue.currentVolunteer ? " " + birdRescue.currentVolunteer : ` AVAILABLE${twoPersonRescue && !birdRescue.currentVolunteer ? "(2)" : ""}`}
+                                        {birdRescue.currentVolunteer !== "None" ? " " + birdRescue.currentVolunteer : ` AVAILABLE${twoPersonRescue && birdRescue.currentVolunteer === "None" ? "(2)" : ""}`}
                                         {renderSecondVolunteerElements(birdRescue, twoPersonRescue)}
                                     </span> 
                                 </span>
@@ -449,14 +449,14 @@ export default function RescueDetails({id}: { id: string }) {
                                     localRescuerName={localRescuerName}
                                 />
                             }
-                            {birdRescue.status === 'Pending' && !birdRescue.currentVolunteer && (
+                            {birdRescue.status === 'Pending' && birdRescue.currentVolunteer === "None" && (
                                 <Button
                                     className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors duration-200"
                                     onClick={handleAcceptClick}>
                                     Accept Rescue
                                 </Button>
                             )}
-                            {birdRescue.status === 'Pending' && birdRescue.currentVolunteer && !birdRescue.secondVolunteer && twoPersonRescue && (
+                            {birdRescue.status === 'Pending' && birdRescue.currentVolunteer !== "None" && birdRescue.secondVolunteer === "None" && twoPersonRescue && (
                                 <Button
                                     className="w-full bg-lime-600 hover:bg-lime-700 text-white transition-colors duration-200"
                                     onClick={handleAcceptClick}>
