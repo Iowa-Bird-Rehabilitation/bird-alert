@@ -57,7 +57,7 @@ export default function RootLayout({
             </div>
           </Card>
         </Link>
-        <Authenticator formFields={formFields}>
+        <Authenticator formFields={formFields} className="mt-44">
           {({ signOut, user }) => (
           <div>
             <div className="mr-6 absolute top-10 right-0 mt-3 md:block hidden">

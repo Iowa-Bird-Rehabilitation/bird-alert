@@ -181,7 +181,12 @@ export default function BirdAlertList() {
                     </CardHeader>
                 </Card>
                 {
-                    showBestPractices && <BestPractices></BestPractices>
+                    showBestPractices 
+                    && 
+                    <div className='mr-4 ml-4'>
+                        <BestPractices></BestPractices>
+                    </div>
+                    
                 }
                 
                 <CardContent className="p-4">
