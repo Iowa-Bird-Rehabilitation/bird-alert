@@ -3,7 +3,7 @@ import { Card } from './ui/card'
 
 export default function BestPractices() {
   return (
-        <Card className="mr-4 ml-4 p-4">
+        <Card className="mr-4 ml-4 p-4 max-w-screen-md min-w-96 m-auto">
             <div>
                 <h2 className='text-center mb-4 font-bold'>Bird Alert Best Practices:</h2>
             </div>
@@ -76,9 +76,9 @@ export default function BestPractices() {
             </div>
 
             <div className='mb-3'>
-                <h2 className='font-bold'>Why is my name not available to choose?</h2>
+                <h2 className='font-bold'>Why is my name not available to select?</h2>
                 <p className='text-stone-800 text-sm'>
-                    The list of names available to choose for each bird alert is automatically determined when the bird alert is created by IBR.
+                    The list of names available to select for each bird alert is automatically determined when the bird alert is created by IBR.
                     This is based off of current skills, training, and location. If you believe that the system has incorrectly left your 
                     name off of an alert, please speak to IBR.
                 </p>
