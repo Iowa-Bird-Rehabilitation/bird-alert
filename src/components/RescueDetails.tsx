@@ -7,6 +7,7 @@ import Airtable from 'airtable'
 import Link from "next/link";
 import { formatDate, formatTime, renderSecondVolunteerElements } from '@/lib/utils'
 import AcceptForm from './AcceptForm'
+import { getCurrentUser } from 'aws-amplify/auth'
 
 
 export default function RescueDetails({id}: { id: string }) {
@@ -19,10 +20,14 @@ export default function RescueDetails({id}: { id: string }) {
     const [volunteers, setVolunteers] = useState<Volunteer[]>([])
     const [userNoteValue, setUserNoteValue] = useState<string>()
     const [twoPersonRescue, setTwoPersonRescue] = useState<Boolean>(false)
+    const [username, setUsername] = useState<String>("")
 
     //connecting to airtable
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
     const airtableBase = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
+
+
+    
 
     const fetchBirdRescue = async () => {
         setError(null)
@@ -276,8 +281,16 @@ export default function RescueDetails({id}: { id: string }) {
       }
 
     useEffect(() => {
+        const fetchData = async () => {
+            const { username, userId, signInDetails } = await getCurrentUser();
+            setUsername(username);
+        };
+
+        fetchData()
         fetchVolunteers()
     }, [])
+
+
 
     return (!birdRescue ? (
             <div className="flex justify-center items-center h-32">
@@ -430,10 +443,10 @@ export default function RescueDetails({id}: { id: string }) {
                             <div className="flex flex-col items-start bg-stone-50 p-3 rounded-md ">
                                 <div className="flex text-align-left items-center bg-stone-50 pb-4 pt-1 rounded-md">
                                     <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
-                                    <p>Volunteer Notes:</p>
+                                    <p>Volunteer Notes: <span></span></p>
                                 </div>
                                 <textarea onChange={(e) => setUserNoteValue(e.target.value)} className='border-2 w-full h-40 p-2 rounded-md resize-none'>{birdRescue.userNotes}</textarea>
-                                <button onClick={() => updateRescueInAirtable(birdRescue.id, {UserNotes: userNoteValue})} className="w-36 bg-blue-600 text-sm hover:bg-blue-700 text-white mt-3 h-8 transition-colors duration-200 rounded-md "> Save Note</button>
+                                <button onClick={() => updateRescueInAirtable(birdRescue.id, {UserNotes: userNoteValue + ` - ${username}`})} className="w-36 bg-blue-600 text-sm hover:bg-blue-700 text-white mt-3 h-8 transition-colors duration-200 rounded-md "> Save Note</button>
                             </div>
                              
                         </div>
