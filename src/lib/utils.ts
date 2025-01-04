@@ -23,4 +23,16 @@ export function renderSecondVolunteerElements(rescue : BirdAlert, twoPersonRescu
   }
 }
 
+export function getCurrentDateAndTime() {
+  const currentDateAndTime = new Date().toLocaleString('en-US', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+    year: '2-digit',
+    month: 'numeric',
+    day: 'numeric'
+  });
+  return currentDateAndTime
+}
+
 

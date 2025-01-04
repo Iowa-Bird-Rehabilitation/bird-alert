@@ -5,7 +5,7 @@ import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
 import Airtable from 'airtable'
 import Link from "next/link";
-import { formatDate, formatTime, renderSecondVolunteerElements } from '@/lib/utils'
+import { formatDate, formatTime, getCurrentDateAndTime, renderSecondVolunteerElements } from '@/lib/utils'
 import AcceptForm from './AcceptForm'
 import { getCurrentUser } from 'aws-amplify/auth'
 
@@ -446,7 +446,7 @@ export default function RescueDetails({id}: { id: string }) {
                                     <p>Volunteer Notes: <span></span></p>
                                 </div>
                                 <textarea onChange={(e) => setUserNoteValue(e.target.value)} className='border-2 w-full h-40 p-2 rounded-md resize-none'>{birdRescue.userNotes}</textarea>
-                                <button onClick={() => updateRescueInAirtable(birdRescue.id, {UserNotes: userNoteValue + ` - ${username}`})} className="w-36 bg-blue-600 text-sm hover:bg-blue-700 text-white mt-3 h-8 transition-colors duration-200 rounded-md "> Save Note</button>
+                                <button onClick={() => updateRescueInAirtable(birdRescue.id, {UserNotes: userNoteValue + ` - ${username} (${getCurrentDateAndTime()})`})} className="w-36 bg-blue-600 text-sm hover:bg-blue-700 text-white mt-3 h-8 transition-colors duration-200 rounded-md "> Save Note</button>
                             </div>
                              
                         </div>
