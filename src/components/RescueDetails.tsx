@@ -5,7 +5,7 @@ import React, {useEffect, useState} from 'react'
 import {Badge} from '@/components/ui/badge'
 import Airtable from 'airtable'
 import Link from "next/link";
-import { formatDate, formatTime, getCurrentDateAndTime, renderSecondVolunteerElements } from '@/lib/utils'
+import { alertToWindow, formatDate, formatTime, getCurrentDateAndTime, getRTLevelColor, getStatusColor, renderSecondVolunteerElements } from '@/lib/utils'
 import AcceptForm from './AcceptForm'
 import { getCurrentUser } from 'aws-amplify/auth'
 
@@ -105,25 +105,38 @@ export default function RescueDetails({id}: { id: string }) {
         setShowAcceptForm(true)
     }
 
+    async function updateBirdAlert(fields: {SecondVolunteer: string, VolunteerStatus: string} | {CurrentVolunteer: string, VolunteerStatus: string}) {
+        try {
+            await airtableBase('Bird Alerts').update([
+                {
+                    id: birdRescue!.id,
+                    fields: fields
+                }
+            ])
+            setShowAcceptForm(false)
+        } catch {
+            throw error
+        }
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (twoPersonRescue && birdRescue?.currentVolunteer !== "None") {
 
             if ((await fetchBirdRescue()).secondVolunteer !== "None") {
-                window.alert("Both spots have been claimed by other volunteers. Please refresh your page to see the updated data.")
+                alertToWindow("Both spots have been claimed by other volunteers. Please refresh your page to see the updated data.")
                 return
             }
            
-            const fields = {SecondVolunteer: localRescuerName, VolunteerStatus: `In Route`}
+            const fields = {
+                            SecondVolunteer: localRescuerName, 
+                            VolunteerStatus: `In Route`
+                        }
+
             try {
-                await airtableBase('Bird Alerts').update([
-                    {
-                        id: birdRescue!.id,
-                        fields: fields
-                    }
-                ])
-                setShowAcceptForm(false)
+                await updateBirdAlert(fields)
+
                 const updatedBird = {...birdRescue} as BirdAlert
                 updatedBird.secondVolunteer = localRescuerName
                 updatedBird.status = 'In Route'
@@ -138,17 +151,18 @@ export default function RescueDetails({id}: { id: string }) {
                 window.alert("Another user has already claimed this Bird Alert, please refresh your page to see the updated data.")
                 return
             }
-            const fields = {CurrentVolunteer: localRescuerName, VolunteerStatus: `${birdRescue?.currentVolunteer === "None" && !twoPersonRescue ? 'In Route' : "Pending"}`}
+
+            const fields = {
+                            CurrentVolunteer: localRescuerName, 
+                            VolunteerStatus: `${birdRescue?.currentVolunteer === "None" && !twoPersonRescue ? 'In Route' : "Pending"}`
+                        }
+
             try {
-                await airtableBase('Bird Alerts').update([
-                    {
-                        id: birdRescue!.id,
-                        fields: fields
-                    }
-                ])
-                setShowAcceptForm(false)
+                await updateBirdAlert(fields)
+
                 const updatedBird = {...birdRescue} as BirdAlert
                 updatedBird.currentVolunteer = localRescuerName
+
                 if (updatedBird.currentVolunteer !== "None" && !twoPersonRescue) {
                     updatedBird.status = 'In Route'
                 }
@@ -195,48 +209,12 @@ export default function RescueDetails({id}: { id: string }) {
                     fields: fields
                 }
             ])
-            console.log('Airtable update response:', updatedRecords)
             return updatedRecords
         } catch (error) {
             console.error('Error updating Airtable:', error)
             throw error
         }
     }
-
-    const getRTLevelColor = (level: RTLevel) => {
-      if (level.toLowerCase().includes("green")) {
-          return 'bg-green-600 hover:bg-green-800'
-      }else if (level.toLowerCase().includes("yellow")) {
-          return 'bg-yellow-600 hover:bg-yellow-800'
-      }else if (level.toLowerCase().includes("red")) {
-          return 'bg-red-600 hover:bg-red-800'
-      }else if (level.toLowerCase().includes("purple")) {
-          return 'bg-purple-600 hover:bg-purple-800'
-      }else {
-          return 'bg-gray-500 hover:bg-gray-800'
-      }
-    }
-
-    const getStatusColor = (status: RescueStatus) => {
-        switch (status) {
-            case 'Pending':
-                return 'bg-rose-600 hover:bg-rose-800'
-            case 'In Route':
-                return 'bg-amber-600 hover:bg-amber-800'
-            case 'On Scene':
-                return 'bg-pink-500 hover:bg-pink-600'
-            case 'Rescued':
-                return 'bg-violet-700 hover:bg-violet-800'
-            case 'Delivered':
-                return 'bg-teal-700 hover:bg-teal-800'
-            case 'Incomplete':
-                return 'bg-red-600 hover:bg-red-700'
-            case 'Released On Site':
-                return 'bg-pink-500 hover:bg-pink-600'
-            default:
-                return 'bg-gray-800 hover:bg-gray-900'
-        }
-      }
 
     useEffect(() => {
         const fetchData = async () => {
@@ -247,8 +225,6 @@ export default function RescueDetails({id}: { id: string }) {
         fetchData()
         fetchVolunteers()
     }, [])
-
-
 
     return (!birdRescue ? (
             <div className="flex justify-center items-center h-32">
