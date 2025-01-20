@@ -26,9 +26,6 @@ export default function RescueDetails({id}: { id: string }) {
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
     const airtableBase = airtable.base(process.env.NEXT_PUBLIC_AIRTABLE_BASE_ID!)
 
-
-    
-
     const fetchBirdRescue = async () => {
         setError(null)
         // airtable fetch
@@ -103,45 +100,6 @@ export default function RescueDetails({id}: { id: string }) {
         }
 
     }
-
-    ///// handle the change of the bird status currently not in use LEAVE CODE HERE
-    // const handleBirdStatusChange = async (newBirdStatus : BirdStatus) => {
-
-    //     if (birdRescue) {
-    //         try {
-
-    //             let updatedFields
-    //             let newVolunteerStatus : RescueStatus = birdRescue.status
-    //             if (newBirdStatus === "Assessed" || newBirdStatus === "Died" || newBirdStatus === "No Show") {
-    //                 newVolunteerStatus = "Incomplete"
-    //                 updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
-    //             }else if (newBirdStatus === "Rescued - Released") {
-    //                 newVolunteerStatus = "Released On Site"
-    //                 updatedFields = {BirdStatus: newBirdStatus, VolunteerStatus: newVolunteerStatus}
-    //             }else {
-    //                 updatedFields = {BirdStatus: undefined, VolunteerStatus: birdRescue.status}
-    //             }
-
-    //             // update airtable column
-    //             if (birdRescue.currentVolunteer) {
-    //                 await updateRescueInAirtable(birdRescue.id, updatedFields)
-    //             }
-                
-    //             // update the bird in BirdAlertList so that it has the new status
-    //             const updatedBird = {
-    //                 ...birdRescue
-    //             }
-
-    //             updatedBird.birdStatus = newBirdStatus
-    //             updatedBird.status = newVolunteerStatus
-    //             setBirdRescue(updatedBird)
-
-    //         }catch (error) {
-    //             console.error('Error updating bird status:', error)
-    //             setError('Failed to update bird status. Please try again.')
-    //         }
-    //     }
-    // }
 
     function handleAcceptClick() {
         setShowAcceptForm(true)
@@ -391,23 +349,6 @@ export default function RescueDetails({id}: { id: string }) {
                                     </span> 
                                 </span>
                             </div>
-
-                            {/* We are keeping this code here as we may still use this dropdown, for now we are instead using the additional status section that was added */}
-                            {/* {
-                                birdRescue.status === "Pending" ?
-                                    <></>
-                                :
-                                    <div className="flex items-center bg-stone-50 p-3 rounded-md">
-                                        <select onChange={(e) => handleBirdStatusChange(e.target.value as BirdStatus)} name='bird-status'
-                                            className=" w-4/12 cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                                            <option value={""}>-- Additional Bird Statuses</option>
-                                            <option value={"Rescued - Released"}> Rescued - Released </option>
-                                            <option value={"No Show"}> No Show </option>
-                                            <option value={"Died"}> Died </option>
-                                            <option value={"Assessed"}> Assessed </option>
-                                        </select>
-                                    </div>
-                            } */}
 
                             <div className="flex items-center bg-stone-50 p-3 rounded-md">
                                 <Clock className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500"/>
