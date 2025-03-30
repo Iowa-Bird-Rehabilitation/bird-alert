@@ -10,20 +10,40 @@ interface Props {
     setShowAcceptForm: Function,
     handleSubmit: FormEventHandler,
     setLocalRescuerName: Function,
-    localRescuerName: string
+    localRescuerName: string,
+    twoPersonRescue: Boolean;
 }
 
-export default function AcceptForm({volunteers, birdRescue, setShowAcceptForm, handleSubmit, setLocalRescuerName, localRescuerName}: Props) {
+export default function AcceptForm({volunteers, birdRescue, setShowAcceptForm, handleSubmit, setLocalRescuerName, localRescuerName, twoPersonRescue}: Props) {
 
     function renderNameOptions() {
-        const volunteerOptions = volunteers.filter((vol: {id: string, name: string}) => birdRescue!.possibleVolunteers.includes(vol.id) && vol.name !== birdRescue?.currentVolunteer)
-        const volunteerOptionElements = volunteerOptions.map((vol: { id: string, name: string }, index: number) => {
-            return (
-                <option key={index} value={vol.name}>
-                    {vol.name}
-                </option>
+        let volunteerOptionElements
+        
+        if (twoPersonRescue && birdRescue.currentVolunteer !== "None") {
+            const volunteerOptions = volunteers.filter((vol: {id: string, name: string}) => 
+                (birdRescue!.nonQualifiedVolunteers.includes(vol.id) || birdRescue.possibleVolunteers.includes(vol.id)) 
+                && vol.name !== birdRescue?.currentVolunteer
             )
-        })
+
+            volunteerOptionElements = volunteerOptions.map((vol: { id: string, name: string }, index: number) => {
+                return (
+                    <option key={index} value={vol.name}>
+                        {vol.name}
+                    </option>
+                )
+            })
+
+        }else {
+            const volunteerOptions = volunteers.filter((vol: {id: string, name: string}) => birdRescue!.possibleVolunteers.includes(vol.id) && vol.name !== birdRescue?.currentVolunteer)
+            volunteerOptionElements = volunteerOptions.map((vol: { id: string, name: string }, index: number) => {
+                return (
+                    <option key={index} value={vol.name}>
+                        {vol.name}
+                    </option>
+                )
+            })
+
+        }
 
         return volunteerOptionElements
     }

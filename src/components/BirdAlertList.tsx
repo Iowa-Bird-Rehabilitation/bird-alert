@@ -71,6 +71,7 @@ export default function BirdAlertList() {
                         rtLevel: fields.RTLevel as RTLevel,
                         skills: fields.TechnicalSkills as string[],
                         possibleVolunteers: fields.PossibleVolunteers as string[] ?? [],
+                        nonQualifiedVolunteers: fields.NonQualifiedVolunteers as string[],
                         currentVolunteer: fields.CurrentVolunteer as string,
                         secondVolunteer: fields.SecondVolunteer as string,
                         photo: fields.BirdPhoto ? ((fields.BirdPhoto as object[])[0] as {

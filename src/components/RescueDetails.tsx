@@ -45,6 +45,7 @@ export default function RescueDetails({id}: { id: string }) {
             rtLevel: record.get('RTLevel') as RTLevel,
             skills: record.get('TechnicalSkills') as string[],
             possibleVolunteers: record.get("PossibleVolunteers") as string[] ?? [],
+            nonQualifiedVolunteers: record.get("NonQualifiedVolunteers") as string[],
             currentVolunteer: record.get("CurrentVolunteer") as string,
             secondVolunteer: record.get("SecondVolunteer") as string,
             photo: record.get('BirdPhoto') ? ((record.get('BirdPhoto') as object[])[0] as {
@@ -195,6 +196,7 @@ export default function RescueDetails({id}: { id: string }) {
             })
             setVolunteers(volunteersData)
         } catch (error) {
+            setIsLoading(false)
             console.error('Error fetching bird rescues:', error)
             setError('Failed to fetch bird rescues. Please try again later.')
         }
@@ -225,6 +227,9 @@ export default function RescueDetails({id}: { id: string }) {
         fetchData()
         fetchVolunteers()
     }, [])
+
+    console.log(birdRescue)
+
 
     return (!birdRescue ? (
             <div className="flex justify-center items-center h-32">
@@ -284,7 +289,7 @@ export default function RescueDetails({id}: { id: string }) {
                             <ul className="">
                                 {birdRescue.skills?.map((skill, index) =>{
                                     return (
-                                        <Badge variant="secondary" className={`bg-gray-800 hover:bg-gray-900 text-white mr-2`}>
+                                        <Badge variant="secondary" key={index} className={`bg-gray-800 hover:bg-gray-900 text-white mr-2`}>
                                             <li key={index}>{skill}</li>
                                         </Badge>
                                     )
@@ -370,13 +375,14 @@ export default function RescueDetails({id}: { id: string }) {
                         <div className="space-y-4" style={{marginBottom: "30px"}}>
                             {
                                 showAcceptForm &&
-                                <AcceptForm 
+                                <AcceptForm
                                     volunteers={volunteers}
                                     birdRescue={birdRescue}
                                     setShowAcceptForm={setShowAcceptForm}
                                     handleSubmit={handleSubmit}
                                     setLocalRescuerName={setLocalRescuerName}
                                     localRescuerName={localRescuerName}
+                                    twoPersonRescue={twoPersonRescue}
                                 />
                             }
                             {birdRescue.status === 'Pending' && birdRescue.currentVolunteer === "None" && (
