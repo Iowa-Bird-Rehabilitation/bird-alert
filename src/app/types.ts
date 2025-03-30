@@ -15,6 +15,7 @@ interface BirdAlert {
     rtLevel: RTLevel,
     skills: string[],
     possibleVolunteers: string[];
+    nonQualifiedVolunteers: string[];
     currentVolunteer: string,
     secondVolunteer: string,
     photo: { url: string, width: number, height: number },
