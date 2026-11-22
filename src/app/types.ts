@@ -1,4 +1,4 @@
-type RescueStatus = 'Pending' | 'In Route' |'On Scene' | 'Rescued' | 'Delivered' | 'Incomplete' | 'Released On Site'
+type RescueStatus = 'Pending' | 'In Route' |'On Scene' | 'Rescued' | 'Delivered' | 'Incomplete' | 'Released On Site' | 'Incomplete (Needs review)'
 type RTLevel = 'Green: songbirds & babies' | 'Yellow: geese, ducks and swans' | 'Red: herons, bats' | 'Purple: raptors';
 type BirdStatus = "" | 'Rescued - Released' | 'No Show' | 'Died' | 'Assessed' 
 

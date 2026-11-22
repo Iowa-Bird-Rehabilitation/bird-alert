@@ -19,8 +19,10 @@ export default function RescueDetails({id}: { id: string }) {
     const [localRescuerName, setLocalRescuerName] = useState<string>("")
     const [volunteers, setVolunteers] = useState<Volunteer[]>([])
     const [userNoteValue, setUserNoteValue] = useState<string>()
+    const [markingIncompleteUserNoteValue, setMarkingIncompleteUserNoteValue] = useState<string>()
     const [twoPersonRescue, setTwoPersonRescue] = useState<Boolean>(false)
     const [username, setUsername] = useState<String>("")
+    const [incompleteModalOpen, setIncompleteModalOpen] = useState<Boolean>(false)
 
     //connecting to airtable
     const airtable = new Airtable({apiKey: process.env.NEXT_PUBLIC_AIRTABLE_ACCESS_TOKEN})
@@ -244,6 +246,53 @@ export default function RescueDetails({id}: { id: string }) {
                     </Link>
                 </div>
 
+                { incompleteModalOpen === true && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+                        <div className="w-full max-w-md rounded-xl bg-white p-0 shadow-2xl overflow-hidden">
+                            <div className="flex flex-col items-start bg-stone-50 p-3 rounded-md">
+                            <div className="flex text-left items-center bg-stone-50 pb-4 pt-1 rounded-md">
+                                <Notebook className="mr-2 h-5 w-5 flex-shrink-0 text-stone-500" />
+                                <p>
+                                Volunteer notes (please provide the reason you are marking this bird alert as incomplete):{" "}
+                                <span></span>
+                                </p>
+                            </div>
+                            <textarea
+                                value={markingIncompleteUserNoteValue}
+                                onChange={(e) => setMarkingIncompleteUserNoteValue(e.target.value)}
+                                className="border-2 w-full h-40 p-2 rounded-md resize-none"
+                            />
+                            </div>
+
+                            <div className="flex flex-col gap-2 p-3">
+                            <Button
+                                className="w-full bg-red-700 hover:bg-red-800 text-white transition-colors duration-200"
+                                onClick={() => setIncompleteModalOpen(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                className="w-full bg-red-700 hover:bg-red-800 text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={!markingIncompleteUserNoteValue?.trim().length ? true : false}
+                                onClick={() => {
+                                handleVolunteerStatusChange("Incomplete (Needs review)");
+                                updateRescueInAirtable(birdRescue.id, {
+                                    UserNotes:
+                                    userNoteValue +
+                                    " " +
+                                    markingIncompleteUserNoteValue +
+                                    ` - ${username} (${getCurrentDateAndTime()})`,
+                                });
+                                setIncompleteModalOpen(false)
+                                }}
+                            >
+                                Mark as Incomplete
+                            </Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <Card className="border shadow-lg rounded-lg overflow-hidden">
                     <CardHeader className="bg-stone-100 border-b border-stone-200 px-4 py-2">
                         <div className="flex items-center justify-between mt-2">
@@ -407,11 +456,18 @@ export default function RescueDetails({id}: { id: string }) {
                                 </Button>
                             )}
                             {birdRescue.status === 'On Scene' &&  (
-                                <Button
-                                    className="w-full bg-red-700 hover:bg-red-800 text-white transition-colors duration-200"
-                                    onClick={() => handleVolunteerStatusChange('Rescued')}>
-                                    Mark as Rescued
-                                </Button>
+                                <>
+                                    <Button
+                                        className="w-full bg-red-700 hover:bg-red-800 text-white transition-colors duration-200"
+                                        onClick={() => handleVolunteerStatusChange('Rescued')}>
+                                        Mark as Rescued
+                                    </Button>
+                                    <Button
+                                        className="w-full bg-purple-700 hover:bg-purple-800 text-white transition-colors duration-200"
+                                        onClick={() => setIncompleteModalOpen(true)}>
+                                        Mark as incomplete
+                                    </Button>
+                                </>
                             )}
                             {birdRescue.status === 'Rescued' && (
                                 <Button
