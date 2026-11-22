@@ -272,7 +272,7 @@ export default function RescueDetails({id}: { id: string }) {
                                 Cancel
                             </Button>
                             <Button
-                                className="w-full bg-red-700 hover:bg-red-800 text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full bg-purple-700 hover:bg-purple-800 text-white transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                 disabled={!markingIncompleteUserNoteValue?.trim().length ? true : false}
                                 onClick={() => {
                                 handleVolunteerStatusChange("Incomplete (Needs review)");
